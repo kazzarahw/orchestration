@@ -16,6 +16,7 @@ fi
 plan=$1
 n=$2
 [ -f "$plan" ] || { echo "no such plan file: $plan" >&2; exit 2; }
+[[ "$n" =~ ^[0-9]+$ ]] || { echo "TASK_NUMBER must be a positive integer" >&2; exit 2; }
 
 if [ $# -eq 3 ]; then
   out=$3
