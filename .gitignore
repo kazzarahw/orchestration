@@ -5,6 +5,9 @@
 .opencode/
 .superpowers/
 
+# Worktrees
+.worktrees/
+
 # Environment and logs
 .env
 .env.*
