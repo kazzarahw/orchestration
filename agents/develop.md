@@ -175,15 +175,12 @@ For **subagent-driven-development**:
       - Implementer must follow TDD: RED (failing test) → GREEN (minimal code) → REFACTOR
       - Implementer self-reviews before returning
       - Handle status: DONE → review, NEEDS_CONTEXT → provide context, BLOCKED → escalate
-   b. **Spec compliance review** — dispatch spec-reviewer subagent
-      - Does code match spec exactly? No extra features, no missing requirements?
-      - If gaps found → send back to implementer, re-review
-   c. **Code quality review** — dispatch code quality reviewer
-      - Clean architecture, test coverage, no magic numbers, no duplication
-      - If issues found → send back to implementer, re-review
+    b. **Task review** — dispatch `@review.md` in per-task mode
+       - Combines spec compliance + code quality in one pass
+       - Does code match spec, is it clean, tested, well-structured?
+       - If Critical or Important issues found → send back to implementer, re-review
    d. **Mark task complete** in TodoWrite
-3. After ALL tasks complete: dispatch `requesting-code-review` for the full implementation batch
-4. Apply `receiving-code-review` when feedback arrives (verify first, push back if wrong, no performative agreement)
+3. Apply `receiving-code-review` when feedback arrives (verify first, push back if wrong, no performative agreement)
 
 **Parallel dispatch rule:** Only invoke `dispatching-parallel-agents` when:
 - A subagent returns BLOCKED and the blocker can be researched independently of the main task flow
@@ -192,18 +189,26 @@ For **subagent-driven-development**:
 
 All subagents must apply `test-driven-development` for every implementation step. All subagents must apply `verification-before-completion` before any completion claim.
 
-### Phase 3b: Integration Critique Gate
+### Phase 3b: Final Review Gate
 
-After all implementation tasks complete, dispatch the `@critique.md` subagent for an **integration-level review** of the full implementation. The Critique agent checks:
-- **Cross-task consistency** — conflicting patterns, naming drift, divergent error handling
-- **Emergent behavior** — issues only visible from combined changes
-- **Design debt** — shortcuts that compound into problems
-- **Integration gaps** — missing imports, incorrect type usage across modules, broken contracts
-- **Regression risk** — changes that break existing behavior
+After all implementation tasks complete (and before dogfood if applicable),
+dispatch `@review.md` in **whole-branch mode** for a single-pass integration
+review. This replaces the previous two-pass system (code-reviewer + critique
+integration).
 
-**Handling Critique results:**
-- **Critical or High issues** → ALWAYS dispatch an implementer subagent to fix each issue (never fix inline). After all fixes applied, re-dispatch Critique for re-review. Repeat until no Critical/High issues remain.
-- **Medium/Low/Info** → note, proceed to next gate or Phase 4.
+The `@review.md` agent checks:
+- Plan alignment — does the full branch match the spec?
+- Code quality — clean, tested, well-structured across all tasks?
+- Architecture — sound design, security, integration with surrounding code?
+- Integration — cross-task consistency, emergent behavior, design debt,
+  broken contracts, regression risk?
+- Production readiness — migrations, backward compat, docs?
+
+**Handling Review results:**
+- **Critical or Important issues** → ALWAYS dispatch an implementer subagent to
+  fix each issue (never fix inline). After all fixes applied, re-dispatch
+  `@review.md` for re-review. Repeat until no Critical/Important issues remain.
+- **Minor/Low/Info** → note, proceed to next gate or Phase 4.
 
 ### Phase 3c: Dogfood QA Gate (if applicable)
 
@@ -264,8 +269,8 @@ Apply `systematic-debugging` for ANY bug, failure, or unexpected behavior:
 
 ### Code Review
 
-Apply `requesting-code-review` at:
-- After ALL tasks complete in a subagent-driven development batch (not after each individual task)
+Apply `@review.md` in whole-branch mode at:
+- After ALL tasks complete in a subagent-driven development batch
 - After completing a major feature milestone
 - Before merge to main
 
