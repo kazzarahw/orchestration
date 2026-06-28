@@ -6,10 +6,25 @@ Personal AI orchestration framework — skills, agents, and plugins for directin
 
 | Directory | Contents |
 |-----------|----------|
-| `skills/` | Reusable skill documents. Each skill is `skills/<name>/SKILL.md` plus optional supporting files. |
-| `agents/` | OpenCode agent definitions (Markdown + YAML frontmatter). |
-| `plugins/` | OpenCode plugins: `superpowers.js` (bootstrap injection) and `goal.ts` (autonomous goal loop). |
-| `docs/` | Generated output — specs, plans, rules, research, reviews. |
+| `src/skills/` | Reusable skill documents. Each skill is `src/skills/<name>/SKILL.md` plus optional supporting files. |
+| `src/agents/` | OpenCode agent definitions (Markdown + YAML frontmatter). |
+| `src/plugins/` | OpenCode plugins: `superpowers.js` (bootstrap injection) and `goal.ts` (autonomous goal loop). |
+| `src/commands/` | OpenCode slash-commands (future use). |
+| `src/docs/` | Spec, plan, review, and rule templates installed to `~/.config/opencode/docs/`. |
+| `install.sh` | Copies `src/` to `~/.config/opencode/` with backup. |
+
+## Install
+
+```bash
+./install.sh
+```
+
+Copies `src/` contents to `~/.config/opencode/`, backing up any existing config first.
+
+**Backup location:** `~/.config/opencode.bak.YYYYMMDD-HHMMSS`
+**To restore:** `cp -r ~/.config/opencode.bak.*/* ~/.config/opencode/`
+
+**What gets overwritten:** `agents/`, `plugins/`, `skills/`, `docs/`, `commands/`, `AGENTS.md`, `CLAUDE.md`. The `opencode.jsonc` and other custom config files are untouched.
 
 ## Skills
 
@@ -19,7 +34,7 @@ The `using-superpowers` skill is the entry point — it's injected automatically
 
 ## Agents (OpenCode)
 
-`agents/develop.md` is the primary orchestrator: design → plan → implement → review → finish. It delegates all code changes to implementer subagents. Other agents (`critique`, `code-reviewer`, `dogfood`, `research`, `task-reviewer`) are dispatched as needed.
+`src/agents/develop.md` is the primary orchestrator: design → plan → implement → review → finish. It delegates all code changes to implementer subagents. Other agents (`critique`, `review`, `dogfood`, `research`, `implement`) are dispatched as needed.
 
 ## Plugins (OpenCode)
 
@@ -28,6 +43,6 @@ The `using-superpowers` skill is the entry point — it's injected automatically
 
 ## Docs conventions
 
-- `docs/specs/YYYY-MM-DD-<topic>-design.md` — design documents
-- `docs/plans/YYYY-MM-DD-<feature>.md` — implementation plans
-- `docs/rules/*.md` — mandatory project constraints (override all default behavior)
+- `src/docs/specs/YYYY-MM-DD-<topic>-design.md` — design documents
+- `src/docs/plans/YYYY-MM-DD-<feature>.md` — implementation plans
+- `src/docs/rules/*.md` — mandatory project constraints (override all default behavior)
