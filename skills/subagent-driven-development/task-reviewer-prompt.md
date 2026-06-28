@@ -1,4 +1,9 @@
-# Task Reviewer Prompt Template
+> **NOTE:** This is a reference document. The active reviewer is now
+> `@review.md` (dispatched in per-task mode). This template documents the
+> dispatch contract for reference — the actual agent prompt lives in
+> `agents/review.md`.
+
+# Task Reviewer Reference (Per-Task Mode — superseded by agents/review.md)
 
 Use this template when dispatching a task reviewer subagent. The reviewer
 reads the task's diff once and returns two verdicts: spec compliance and
