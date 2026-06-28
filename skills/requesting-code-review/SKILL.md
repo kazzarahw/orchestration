@@ -1,37 +1,31 @@
 ---
 name: requesting-code-review
-description: Use when completing tasks, implementing major features, or before merging to verify work meets requirements
+description: >-
+  Standalone reference for manually requesting code review outside the
+  default development workflow. The primary workflow (subagent-driven
+  development) dispatches @review.md directly. Use this when you want
+  to request a review ad-hoc — for a small fix, a refactoring, or a
+  change made without the full SDD lifecycle.
 ---
 
 # Requesting Code Review
 
-Dispatch a code reviewer subagent to catch issues before they cascade. The reviewer gets precisely crafted context for evaluation — never your session's history. This keeps the reviewer focused on the work product, not your thought process, and preserves your own context for continued work.
-
-**Core principle:** Review early, review often.
-
-## When to Request Review
-
-**Mandatory:**
-- After each task in subagent-driven development
-- After completing major feature
-- Before merge to main
-
-**Optional but valuable:**
-- When stuck (fresh perspective)
-- Before refactoring (baseline check)
-- After fixing complex bug
+**Note:** The default development workflow dispatches `@review.md` directly
+for both per-task and whole-branch review. This skill is a standalone
+reference for ad-hoc review requests outside that workflow.
 
 ## How to Request
 
 **1. Get git SHAs:**
 ```bash
-BASE_SHA=$(git rev-parse HEAD~1)  # or origin/main
+BASE_SHA=$(git merge-base origin/main HEAD)
 HEAD_SHA=$(git rev-parse HEAD)
 ```
 
-**2. Dispatch code reviewer subagent:**
+**2. Dispatch review subagent:**
 
-Dispatch a `general-purpose` subagent, filling the template at [code-reviewer.md](code-reviewer.md)
+Dispatch `@review.md` in whole-branch mode, filling the minimum template
+at [code-reviewer.md](code-reviewer.md).
 
 **Placeholders:**
 - `{DESCRIPTION}` - Brief summary of what you built
@@ -48,44 +42,23 @@ Dispatch a `general-purpose` subagent, filling the template at [code-reviewer.md
 ## Example
 
 ```
-[Just completed Task 2: Add verification function]
+[Just completed a feature fix]
 
-You: Let me request code review before proceeding.
+You: Let me request code review before merging.
 
-BASE_SHA=$(git log --oneline | grep "Task 1" | head -1 | awk '{print $1}')
-HEAD_SHA=$(git rev-parse HEAD)
-
-[Dispatch code reviewer subagent]
-  DESCRIPTION: Added verifyIndex() and repairIndex() with 4 issue types
-  PLAN_OR_REQUIREMENTS: Task 2 from docs/plans/deployment-plan.md
+[Request review with]:
+  DESCRIPTION: Fixed indexing timeout for large directories
+  PLAN_OR_REQUIREMENTS: The fix should handle 100k+ files
   BASE_SHA: a7981ec
   HEAD_SHA: 3df7661
 
 [Subagent returns]:
-  Strengths: Clean architecture, real tests
-  Issues:
-    Important: Missing progress indicators
-    Minor: Magic number (100) for reporting interval
-  Assessment: Ready to proceed
+  Strengths: Clean fix, good edge case handling
+  Issues: None
+  Assessment: Ready to merge
 
-You: [Fix progress indicators]
-[Continue to Task 3]
+You: [Merge]
 ```
-
-## Integration with Workflows
-
-**Subagent-Driven Development:**
-- Review after EACH task
-- Catch issues before they compound
-- Fix before moving to next task
-
-**Executing Plans:**
-- Review after each task or at natural checkpoints
-- Get feedback, apply, continue
-
-**Ad-Hoc Development:**
-- Review before merge
-- Review when stuck
 
 ## Red Flags
 

@@ -1,16 +1,17 @@
-# Code Reviewer Prompt Template
+# Review Agent Prompt Template (Whole-Branch Mode)
 
-Use this template when dispatching a code reviewer subagent.
+Use this template when dispatching the review agent in whole-branch mode.
 
 **Purpose:** Review completed work against requirements and code quality standards before it cascades into more work.
 
 ```
-Subagent (general-purpose):
-  description: "Review code changes"
+Subagent (@review.md):
+  description: "Review code (whole-branch mode)"
   prompt: |
-    You are a Senior Code Reviewer with expertise in software architecture,
-    design patterns, and best practices. Your job is to review completed work
-    against its plan or requirements and identify issues before they cascade.
+    You are the Review Agent in whole-branch mode.
+
+    ## Configuration
+    review_mode: whole-branch
 
     ## What Was Implemented
 
