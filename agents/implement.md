@@ -1,8 +1,8 @@
 ---
 description: >-
-  Implements individual tasks from a development plan. Dispatched per-task by an
-  orchestrating agent (e.g., during subagent-driven-development) to write code
-  and tests following TDD, self-review, and structured reporting. Does NOT
+  Use to implement individual tasks from a development plan. Dispatched per-task
+  by an orchestrating agent (e.g., during subagent-driven-development) to write
+  code and tests following TDD, self-review, and structured reporting. Does NOT
   design, plan, or review — only implement.
 
   <example>
