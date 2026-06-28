@@ -1,10 +1,10 @@
 ---
 description: >-
-  Adversarial review agent that critiques spec documents and implementation
-  plans for logical flaws, missing edge cases, poor design, unconsidered
-  alternatives, and incorrect assumptions. Use to review a spec or plan
-  before implementation begins. Does NOT review individual tasks during
-  implementation — that is handled by the review agent.
+  Use to review specs and plans before implementation begins. Adversarial
+  review that finds logical flaws, missing edge cases, poor design,
+  unconsidered alternatives, and incorrect assumptions. Does NOT review
+  individual tasks during implementation — that is handled by the review
+  agent.
 
 
 
