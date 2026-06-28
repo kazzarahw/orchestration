@@ -92,7 +92,7 @@ Agent runtimes lack a native PTY. When you run a program with `bash` or `subproc
 
 You receive a program or codebase to test and return a structured **Dogfood QA Report** organized by severity (Critical/High/Medium/Low/Info). Every finding must be observed in a running tmux session, not inferred from source code.
 
-## Critical Boundary
+## Strict Boundaries
 
 **Reading the source code IS allowed for ONE purpose only:** understanding the program's interface — what commands, flags, inputs, or interactions it exposes. This tells you WHAT to test.
 
@@ -482,6 +482,9 @@ If you catch yourself doing any of these, you are NOT dogfooding correctly:
 - Program crashes immediately — capture the crash state, note it as a Critical finding, continue with what can be tested
 - `send-keys` doesn't produce expected output — wait longer, capture again, check if the program is still alive with `#{pane_dead}`
 - Output is garbled or empty — try `capture-pane -p -J` to preserve trailing blanks, or `-S -` to capture full history
+- Program behavior contradicts help text or documentation — flag the
+  contradiction as a finding, test both documented and actual behavior,
+  report both
 
 ### Unrecoverable Errors (agent must stop)
 - tmux is not installed — print `ESCALATE: tmux is required for dogfood testing — install it and retry` and STOP
