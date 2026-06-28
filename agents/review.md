@@ -1,6 +1,6 @@
 ---
 description: >-
-  Use to review implementation diffs in per-task or whole-branch mode.
+  Use this agent to review implementation diffs in per-task or whole-branch mode.
   Cooperative review for spec compliance and code quality. Called in two
   modes: per-task (spec compliance + code quality for a single task) and
   whole-branch (full integration assessment before merge). Does NOT do

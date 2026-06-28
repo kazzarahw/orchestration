@@ -1,6 +1,6 @@
 ---
 description: >-
-  Use to review specs and plans before implementation begins. Adversarial
+  Use this agent to review specs and plans before implementation begins. Adversarial
   review that finds logical flaws, missing edge cases, poor design,
   unconsidered alternatives, and incorrect assumptions. Does NOT review
   individual tasks during implementation — that is handled by the review
