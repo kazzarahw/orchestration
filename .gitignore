@@ -1,2 +1,11 @@
 # Notes
 .notes.md
+
+# Runtime directories created by plugins/skills
+.opencode/
+.superpowers/
+
+# Environment and logs
+.env
+.env.*
+*.log
