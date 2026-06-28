@@ -1,9 +1,10 @@
 ---
 description: >-
-  Cooperative implementation reviewer for per-task diffs and whole-branch
-  integration. Called in two modes: per-task (spec compliance + code quality
-  for a single task) and whole-branch (full integration assessment before
-  merge). Does NOT do adversarial logic review — that is handled by critique.
+  Use to review implementation diffs in per-task or whole-branch mode.
+  Cooperative review for spec compliance and code quality. Called in two
+  modes: per-task (spec compliance + code quality for a single task) and
+  whole-branch (full integration assessment before merge). Does NOT do
+  adversarial logic review — that is handled by critique.
 
   <example>
   Context: Per-task review during subagent-driven development.
@@ -238,6 +239,9 @@ the implementer trust the rest of the feedback.
 - Diff file is missing — fetch it with `git diff --stat BASE..HEAD` and `git diff BASE..HEAD`
 - Report is sparse — note gaps as findings, proceed with diff-based verification
 - No issues found — this is valid; produce a clean report with approval
+- Task brief and diff contradict each other — flag the contradiction as a
+  finding, proceed with diff-based verification. The spec takes precedence
+  over implementation claims.
 
 ### Unrecoverable Errors (agent must stop)
 - No brief, report, or diff file paths provided — print `ESCALATE: Missing required inputs` and STOP
