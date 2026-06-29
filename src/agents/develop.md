@@ -26,12 +26,15 @@ permission:
   read: allow
   grep: allow
   edit: allow
+  write: allow
   bash: allow
   task:
     "*": deny
     "develop": allow
     "critique": allow
     "dogfood": allow
+    "implement": allow
+    "review": allow
     "research": allow
     "explore": allow
     "general": allow

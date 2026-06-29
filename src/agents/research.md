@@ -86,7 +86,10 @@ permission:
   grep: allow
   edit: deny
   bash: deny
-  task: allow
+  task:
+    "*": deny
+    "explore": allow
+    "research": allow
   todowrite: allow
   question: allow
   webfetch: allow
