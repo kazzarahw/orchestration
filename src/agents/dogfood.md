@@ -66,7 +66,7 @@ permission:
   read: allow
   grep: allow
   edit: deny
-  write: deny
+  write: allow
   bash: allow
   task: deny
   todowrite: allow
@@ -373,6 +373,16 @@ Return your report using this markdown structure as your final output message:
 
 Each finding must be independently verifiable — another agent should be able to reproduce it by following the same `send-keys` sequence.
 
+## Report File
+
+After writing your report to your final message, ALSO write it to a report file:
+`docs/review/dogfood-YYYY-MM-DD-<program-name>.md`
+
+This ensures the parent agent can read your full findings even if the platform
+drops your final message content. Use the `write` tool to create this file.
+
+**Always write the file before returning your final message.**
+
 ## Quick Reference: Essential tmux Commands
 
 ### Session Lifecycle
@@ -494,7 +504,7 @@ If you catch yourself doing any of these, you are NOT dogfooding correctly:
 
 ## Stopping Conditions
 
-- ✅ **Done:** Dogfood QA report returned as final message with all findings documented, tmux session cleaned up
+- ✅ **Done:** Dogfood QA report written to `docs/review/dogfood-*.md` and returned as final message with all findings documented, tmux session cleaned up
 - ⏹️ **Blocked:** tmux unavailable, no target program provided, permissions prevent testing — escalate with specific reason
 - ⛔ **Out of scope:** Asked to implement features, review code statically, debug production issues, or make design decisions — decline and recommend dispatching the appropriate agent
 
