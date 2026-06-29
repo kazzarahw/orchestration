@@ -43,9 +43,9 @@ The `using-superpowers` skill is the entry point — it's injected automatically
 
 ## Docs conventions
 
-- \`src/docs/plans/design-YYYY-MM-DD-<topic>.md\` — design documents
-- \`src/docs/plans/plan-YYYY-MM-DD-<feature>.md\` — implementation plans
-- \`src/docs/review/critique-*.md\` — critique reports
-- \`src/docs/review/review-*.md\` — code review reports
-- \`src/docs/review/dogfood-*.md\` — QA reports
-- \`src/docs/rules/*.md\` — mandatory project constraints (override all default behavior)
+- `src/docs/plans/design-YYYY-MM-DD-<topic>.md` — design documents
+- `src/docs/plans/plan-YYYY-MM-DD-<feature>.md` — implementation plans
+- `src/docs/review/critique-*.md` — critique reports
+- `src/docs/review/review-*.md` — code review reports
+- `src/docs/review/dogfood-*.md` — QA reports
+- `src/docs/rules/*.md` — mandatory project constraints (override all default behavior)

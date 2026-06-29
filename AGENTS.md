@@ -59,13 +59,13 @@ The `src/agents/develop.md` primary agent is the main entry point for all develo
 
 | Path | Content |
 |------|---------|
-| \`src/docs/plans/design-YYYY-MM-DD-<topic>.md\` | Design documents (from brainstorming skill) |
-| \`src/docs/plans/plan-YYYY-MM-DD-<feature>.md\` | Implementation plans (from writing-plans skill) |
-| \`src/docs/rules/*.md\` | Mandatory project constraints (from writing-rules skill) |
-| \`src/docs/review/critique-*.md\` | Critique reports (adversarial spec/plan review) |
-| \`src/docs/review/review-*.md\` | Code review reports (per-task and whole-branch) |
-| \`src/docs/review/dogfood-*.md\` | Dogfood QA reports (interactive testing) |
-| \`src/docs/research/\` | Research outputs |
+| `src/docs/plans/design-YYYY-MM-DD-<topic>.md` | Design documents (from brainstorming skill) |
+| `src/docs/plans/plan-YYYY-MM-DD-<feature>.md` | Implementation plans (from writing-plans skill) |
+| `src/docs/rules/*.md` | Mandatory project constraints (from writing-rules skill) |
+| `src/docs/review/critique-*.md` | Critique reports (adversarial spec/plan review) |
+| `src/docs/review/review-*.md` | Code review reports (per-task and whole-branch) |
+| `src/docs/review/dogfood-*.md` | Dogfood QA reports (interactive testing) |
+| `src/docs/research/` | Research outputs |
 
 Rules in `src/docs/rules/` override all skill and default behavior — the develop agent re-reads them after any working directory change.
 
