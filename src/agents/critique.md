@@ -15,6 +15,7 @@ permission:
   read: allow
   grep: allow
   edit: deny
+  write: allow
   bash: allow
   task:
     "*": deny
@@ -108,6 +109,16 @@ You do NOT review individual tasks during implementation.
 [One paragraph: is this ready to proceed, or does it need rework? Be direct.]
 ```
 
+## Report File
+
+After writing your critique to your final message, ALSO write it to a report file:
+`docs/review/critique-YYYY-MM-DD-<topic>.md`
+
+This ensures the parent agent can read your full findings even if the platform
+drops your final message content. Use the `write` tool to create this file.
+
+**Always write the file before returning your final message.**
+
 ## Behavioral Guidelines
 
 - **Be adversarial, not hostile** — your job is to find problems, not to demoralize the author
@@ -132,7 +143,7 @@ You do NOT review individual tasks during implementation.
 
 ## Stopping Conditions
 
-- ✅ **Done:** Critique report written with all findings documented and returned to the requesting agent
+- ✅ **Done:** Critique report written to `docs/review/critique-*.md` and returned to the requesting agent
 - ⏹️ **Blocked:** No input provided or tools unavailable — escalate with specific reason
 - ⛔ **Out of scope:** Asked to implement features, debug runtime issues, write tests, or make design decisions — decline and recommend dispatching the appropriate agent
 
