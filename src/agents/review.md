@@ -29,7 +29,7 @@ permission:
   read: allow
   grep: allow
   edit: deny
-  write: deny
+  write: allow
   bash: allow
   task: deny
   todowrite: allow
@@ -227,6 +227,16 @@ For each issue: file:line, what's wrong, why it matters, how to fix.
 
 ---
 
+## Report File
+
+After writing your review to your final message, ALSO write it to a report file:
+`docs/review/review-YYYY-MM-DD-<topic>-<mode>.md`
+
+This ensures the parent agent can read your full findings even if the platform
+drops your final message content. Use the `write` tool to create this file.
+
+**Always write the file before returning your final message.**
+
 ## Calibration (Both Modes)
 
 Categorize issues by actual severity. Not everything is Critical.
@@ -250,6 +260,6 @@ the implementer trust the rest of the feedback.
 
 ## Stopping Conditions
 
-- ✅ **Done:** All review dimensions checked per mode, structured report with verdict returned
+- ✅ **Done:** All review dimensions checked per mode, structured report written to `docs/review/review-*.md` with verdict returned
 - ⏹️ **Blocked:** Missing inputs or tool failure — escalate with specific reason
 - ⛔ **Out of scope:** Asked to implement features, write tests, or do adversarial logic review — decline and recommend dispatching the appropriate agent
