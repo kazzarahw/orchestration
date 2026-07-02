@@ -80,7 +80,7 @@ function assert(condition, message) {
 
 let SkillAutoinjectionPlugin;
 try {
-  const mod = await import('./src/plugins/skill-autoinjection.js');
+  const mod = await import('../src/plugins/skill-autoinjection.js');
   SkillAutoinjectionPlugin = mod.SkillAutoinjectionPlugin || mod.default;
   assert(typeof SkillAutoinjectionPlugin === 'function', 'Plugin exports a factory function');
 } catch (err) {
