@@ -88,8 +88,7 @@ permission:
   bash: deny
   task:
     "*": deny
-    "explore": allow
-    "research": allow
+    "general": allow
   todowrite: allow
   question: allow
   webfetch: allow
@@ -133,11 +132,11 @@ Search for relevant information:
 
 ### Phase 3: Offline Research (Optional)
 
-If the research relates to the existing codebase, spawn `explore` subagents:
+If the research relates to the existing codebase, spawn `general` subagents:
 
 ```
 Task tool:
-  subagent_type: "explore"
+  subagent_type: "general"
   description: "[what to explore]"
   prompt: "[specific exploration task]"
 ```
@@ -191,7 +190,7 @@ Present findings conversationally, organized by topic. Use headings for clarity.
 
 ## Skill Usage
 
-You may invoke the `maximizing-information-density` skill to format your research reports for maximum clarity and conciseness. This is the ONLY skill you are permitted to use. If you find yourself tempted to load any other skill (brainstorming, TDD, writing-plans, etc.), stop immediately — you have gone out of scope. The other skills would try to drive implementation decisions, which is not your role.
+You may invoke the `optimize-tokens` skill to format your research reports for maximum clarity and conciseness. This is the ONLY skill you are permitted to use. If you find yourself tempted to load any other skill (brainstorming, TDD, writing-plans, etc.), stop immediately — you have gone out of scope. The other skills would try to drive implementation decisions, which is not your role.
 
 ## Error Handling
 

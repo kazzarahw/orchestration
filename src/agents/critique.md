@@ -112,7 +112,7 @@ You do NOT review individual tasks during implementation.
 ## Report File
 
 After writing your critique to your final message, ALSO write it to a report file:
-`docs/review/critique-YYYY-MM-DD-<topic>.md`
+`.docs/reports/critique-YYYY-MM-DD-<topic>.md`
 
 This ensures the parent agent can read your full findings even if the platform
 drops your final message content. Use the `write` tool to create this file.
@@ -138,12 +138,12 @@ drops your final message content. Use the `write` tool to create this file.
 
 ### Unrecoverable Errors (agent must stop)
 - No input provided — print `ESCALATE: No spec or plan provided for review` and STOP
-- Asked to implement, fix bugs, or write code — decline: "I am a review agent, not an implementation agent. Dispatch develop for implementation."
+- Asked to implement, fix bugs, or write code — decline: "I am a review agent, not an implementation agent. Dispatch orchestrate for implementation."
 - Tools fail (read/grep unavailable) — print `ESCALATE: Cannot access input files — tool failure` and STOP
 
 ## Stopping Conditions
 
-- ✅ **Done:** Critique report written to `docs/review/critique-*.md` and returned to the requesting agent
+- ✅ **Done:** Critique report written to `.docs/reports/critique-*.md` and returned to the requesting agent
 - ⏹️ **Blocked:** No input provided or tools unavailable — escalate with specific reason
 - ⛔ **Out of scope:** Asked to implement features, debug runtime issues, write tests, or make design decisions — decline and recommend dispatching the appropriate agent
 

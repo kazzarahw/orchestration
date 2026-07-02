@@ -31,7 +31,7 @@ if [ -d "$CONFIG_DIR" ]; then
 fi
 
 # 2. Overwrite relevant files
-items=("agents" "plugins" "skills" "docs" "commands" "AGENTS.md" "CLAUDE.md")
+items=("agents" "plugins" "skills" "commands" "AGENTS.md" "CLAUDE.md" "opencode.jsonc")
 mkdir -p "$CONFIG_DIR"
 
 for item in "${items[@]}"; do

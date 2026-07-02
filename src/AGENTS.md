@@ -5,7 +5,7 @@ These rules apply to all OpenCode sessions unless overridden by a project-level 
 ## Precedence (highest to lowest)
 
 1. **Agent system prompt** — explicit constraints in the agent definition body (e.g., "NO inline implementation")
-2. **`docs/rules/*`** — project-specific rules loaded via Superpowers Phase 0
+2. **`.docs/rules/*`** — project-specific rules loaded at session start
 3. **`AGENTS.md` (this file)** — global rules for all sessions
 4. **Default OpenCode behavior** — built-in defaults
 
@@ -13,7 +13,7 @@ These rules apply to all OpenCode sessions unless overridden by a project-level 
 
 - **No code before failing test:** TDD iron law applies to ALL implementation work. Write the test, watch it fail, implement, watch it pass, refactor. No exceptions without explicit human consent.
 - **No completion claims without verification:** Before claiming work is done, run the full verification command, read the output, check exit codes and failure counts. Evidence before assertions.
-- **No inline fixes:** All code changes must be dispatched to a subagent. Direct edits are only allowed for design docs (`docs/plans/design-*`), plans (`docs/plans/plan-*`), review reports (`docs/review/`), documentation, and configuration files.
+- **No inline fixes:** All code changes must be dispatched to a subagent. Direct edits are only allowed for design docs (`.docs/designs/`), plans (`.docs/plans/`), review reports (`.docs/reports/`), documentation, and configuration files.
 - **No performative agreement on code review:** When receiving feedback, verify against codebase reality. Push back with technical reasoning if wrong. Do not say "great point!" or "you're absolutely right!" — just fix it or refute it.
 
 ## Debugging
@@ -25,7 +25,7 @@ These rules apply to all OpenCode sessions unless overridden by a project-level 
 
 - **Fresh context per subagent:** Never pass session history to a subagent. Construct exactly what they need.
 - **Subagents must return structured summaries:** Findings, status, next action — not raw output.
-- **Two-stage review:** Spec compliance review first, code quality review second. Never skip either.
+- **Two-stage review:** Per-task review: spec compliance + code quality for each implementation task. Whole-branch review: combined integration pass before merge.
 
 ## Agent Definitions
 

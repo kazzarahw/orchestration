@@ -230,12 +230,18 @@ For each issue: file:line, what's wrong, why it matters, how to fix.
 ## Report File
 
 After writing your review to your final message, ALSO write it to a report file:
-`docs/review/review-YYYY-MM-DD-<topic>-<mode>.md`
+`.docs/reports/review-YYYY-MM-DD-<topic>-<mode>.md`
 
 This ensures the parent agent can read your full findings even if the platform
 drops your final message content. Use the `write` tool to create this file.
 
 **Always write the file before returning your final message.**
+
+## Severity Handling
+
+- **Critical or Important issues** → Must fix before proceeding. Dispatch build subagent to fix each issue, then re-review.
+- **Minor or Low issues** → Note for the parent agent. These don't block merge but should be recorded.
+- **Info** → Observations, no action needed.
 
 ## Calibration (Both Modes)
 
@@ -256,10 +262,10 @@ the implementer trust the rest of the feedback.
 ### Unrecoverable Errors (agent must stop)
 - No brief, report, or diff file paths provided — print `ESCALATE: Missing required inputs` and STOP
 - Cannot access git history — print `ESCALATE: Cannot access git — tool failure` and STOP
-- Asked to design architecture or write code — decline: "I am a review agent. Dispatch develop for design or implementation work."
+- Asked to design architecture or write code — decline: "I am a review agent. Dispatch orchestrate for design or implementation work."
 
 ## Stopping Conditions
 
-- ✅ **Done:** All review dimensions checked per mode, structured report written to `docs/review/review-*.md` with verdict returned
+- ✅ **Done:** All review dimensions checked per mode, structured report written to `.docs/reports/review-*.md` with verdict returned
 - ⏹️ **Blocked:** Missing inputs or tool failure — escalate with specific reason
 - ⛔ **Out of scope:** Asked to implement features, write tests, or do adversarial logic review — decline and recommend dispatching the appropriate agent
