@@ -61,7 +61,7 @@ The `src/agents/orchestrate.md` primary agent is the main entry point for all de
 |------|---------|
 | `.docs/designs/` | Design documents (from brainstorming skill) |
 | `.docs/plans/` | Implementation plans (from plan agent) |
-| `.docs/rules/*.md` | Mandatory project constraints (from writing-rules skill) |
+| `.docs/rules/*.md` | Mandatory project constraints (from create-rule skill) |
 | `.docs/reports/` | Critique, review, and dogfood QA reports |
 
 Rules in `.docs/rules/` override all skill and default behavior — the orchestrator agent re-reads them after any working directory change.
