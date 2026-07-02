@@ -262,7 +262,7 @@ the implementer trust the rest of the feedback.
 ### Unrecoverable Errors (agent must stop)
 - No brief, report, or diff file paths provided — print `ESCALATE: Missing required inputs` and STOP
 - Cannot access git history — print `ESCALATE: Cannot access git — tool failure` and STOP
-- Asked to design architecture or write code — decline: "I am a review agent. Dispatch develop for design or implementation work."
+- Asked to design architecture or write code — decline: "I am a review agent. Dispatch orchestrate for design or implementation work."
 
 ## Stopping Conditions
 

@@ -280,13 +280,13 @@ Before [action], ask:
 Save the completed rules document to a deterministic, discoverable path:
 
 ```
-docs/rules/<topic>.md
+.docs/rules/<topic>.md
 ```
 
-For a naming conventions document: `docs/rules/naming-conventions.md`.
-For commit conventions: `docs/rules/commit-conventions.md`.
-For architecture rules: `docs/rules/architecture.md`.
-For coding standards: `docs/rules/coding-standards.md`.
+For a naming conventions document: `.docs/rules/naming-conventions.md`.
+For commit conventions: `.docs/rules/commit-conventions.md`.
+For architecture rules: `.docs/rules/architecture.md`.
+For coding standards: `.docs/rules/coding-standards.md`.
 
 If the project has a user preference that overrides this path (e.g., specified in `CLAUDE.md` or `AGENTS.md`), honor it instead.
 

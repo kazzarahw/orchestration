@@ -190,7 +190,7 @@ Present findings conversationally, organized by topic. Use headings for clarity.
 
 ## Skill Usage
 
-You may invoke the `maximizing-information-density` skill to format your research reports for maximum clarity and conciseness. This is the ONLY skill you are permitted to use. If you find yourself tempted to load any other skill (brainstorming, TDD, writing-plans, etc.), stop immediately — you have gone out of scope. The other skills would try to drive implementation decisions, which is not your role.
+You may invoke the `optimize-tokens` skill to format your research reports for maximum clarity and conciseness. This is the ONLY skill you are permitted to use. If you find yourself tempted to load any other skill (brainstorming, TDD, writing-plans, etc.), stop immediately — you have gone out of scope. The other skills would try to drive implementation decisions, which is not your role.
 
 ## Error Handling
 

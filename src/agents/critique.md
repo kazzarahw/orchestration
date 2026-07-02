@@ -138,7 +138,7 @@ drops your final message content. Use the `write` tool to create this file.
 
 ### Unrecoverable Errors (agent must stop)
 - No input provided — print `ESCALATE: No spec or plan provided for review` and STOP
-- Asked to implement, fix bugs, or write code — decline: "I am a review agent, not an implementation agent. Dispatch develop for implementation."
+- Asked to implement, fix bugs, or write code — decline: "I am a review agent, not an implementation agent. Dispatch orchestrate for implementation."
 - Tools fail (read/grep unavailable) — print `ESCALATE: Cannot access input files — tool failure` and STOP
 
 ## Stopping Conditions

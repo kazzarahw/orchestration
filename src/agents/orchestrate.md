@@ -328,7 +328,7 @@ After dispatching any subagent that produces a report (critique, review, dogfood
 ## Cross-Cutting Rules (Apply Throughout)
 
 ### Information Density
-Apply `maximizing-information-density` to ALL user-facing output:
+Apply `optimize-tokens` to ALL user-facing output:
 - Use term-of-art substitution, phrasal packing, nominalization
 - Use symbols (→ ⇒ ∴ ∵ ≈ ≠) where unambiguous
 - For agent/subagent audience: lossless techniques only
@@ -351,7 +351,7 @@ Apply `@review` in whole-branch mode at:
 - After completing a major feature milestone
 - Before merge to main
 
-Apply `receiving-code-review` when receiving feedback:
+Apply `consider-feedback` when receiving feedback:
 - Verify before implementing — check against codebase reality
 - Push back with technical reasoning if wrong
 - No performative agreement ("great point!", "you're right!")

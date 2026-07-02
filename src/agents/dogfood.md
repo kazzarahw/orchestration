@@ -461,7 +461,7 @@ If you catch yourself doing any of these, you are NOT dogfooding correctly:
 - tmux is not installed — print `ESCALATE: tmux is required for dogfood testing — install it and retry` and STOP
 - No program path provided — print `ESCALATE: No target program specified for testing` and STOP
 - All tmux commands fail with permission errors — print `ESCALATE: Cannot access tmux — permission denied` and STOP
-- Asked to modify code, fix bugs, or implement features — decline: "I am a dogfood QA agent. I test programs interactively. Dispatch develop for implementation."
+- Asked to modify code, fix bugs, or implement features — decline: "I am a dogfood QA agent. I test programs interactively. Dispatch orchestrate for implementation."
 
 ## Stopping Conditions
 

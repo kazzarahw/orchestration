@@ -8,9 +8,9 @@ Personal AI orchestration framework — skills, agents, and plugins for directin
 |-----------|----------|
 | `src/skills/` | Reusable skill documents. Each skill is `src/skills/<name>/SKILL.md` plus optional supporting files. |
 | `src/agents/` | OpenCode agent definitions (Markdown + YAML frontmatter). |
-| `src/plugins/` | OpenCode plugins: `superpowers.js` (bootstrap injection) and `goal.ts` (autonomous goal loop). |
+| `src/plugins/` | OpenCode plugins: `skill-autoinjection.js` (bootstrap injection) and `goal.ts` (autonomous goal loop). |
 | `src/commands/` | OpenCode slash-commands (future use). |
-| `src/docs/` | Spec, plan, review, and rule templates installed to `~/.config/opencode/docs/`. |
+| `.docs/` | Spec, plan, review, and rule templates. |
 | `install.sh` | Copies `src/` to `~/.config/opencode/` with backup. |
 
 ## Install
@@ -24,28 +24,28 @@ Copies `src/` contents to `~/.config/opencode/`, backing up any existing config 
 **Backup location:** `~/.config/opencode.bak.YYYYMMDD-HHMMSS`
 **To restore:** `cp -r ~/.config/opencode.bak.*/* ~/.config/opencode/`
 
-**What gets overwritten:** `agents/`, `plugins/`, `skills/`, `docs/`, `commands/`, `AGENTS.md`, `CLAUDE.md`. The `opencode.jsonc` and other custom config files are untouched.
+**What gets overwritten:** `agents/`, `plugins/`, `skills/`, `commands/`, `AGENTS.md`, `CLAUDE.md`, `opencode.jsonc`. Other custom config files are untouched.
 
 ## Skills
 
 Skills are Markdown files that teach AI agents proven techniques and workflows. They load on demand via each runtime's skill mechanism (e.g. the `Skill` tool in Claude Code).
 
-The `using-superpowers` skill is the entry point — it's injected automatically at session start and explains how to discover and invoke all other skills.
+The `skill-autoinjection.js` plugin injects bootstrap context automatically at session start, loading orientation and conventions.
 
 ## Agents (OpenCode)
 
-`src/agents/develop.md` is the primary orchestrator: design → plan → implement → review → finish. It delegates all code changes to implementer subagents. Other agents (`critique`, `review`, `dogfood`, `research`, `implement`) are dispatched as needed.
+`src/agents/orchestrate.md` is the primary orchestrator: design → plan → implement → review → finish. It delegates all code changes to build subagents. Other agents (`critique`, `review`, `dogfood`, `research`, `design`, `plan`) are dispatched as needed.
 
 ## Plugins (OpenCode)
 
-- **superpowers.js** — injects bootstrap context into the first user message of each session; registers the skills directory.
+- **skill-autoinjection.js** — injects bootstrap context into the first user message of each session; registers the skills directory.
 - **goal.ts** — adds `/goal <description>` to run an autonomous implementation loop with stagnation detection and a two-phase (implement → verify) state machine.
 
 ## Docs conventions
 
-- `src/docs/plans/design-YYYY-MM-DD-<topic>.md` — design documents
-- `src/docs/plans/plan-YYYY-MM-DD-<feature>.md` — implementation plans
-- `src/docs/review/critique-*.md` — critique reports
-- `src/docs/review/review-*.md` — code review reports
-- `src/docs/review/dogfood-*.md` — QA reports
-- `src/docs/rules/*.md` — mandatory project constraints (override all default behavior)
+- `.docs/designs/design-YYYY-MM-DD-<topic>.md` — design documents
+- `.docs/plans/plan-YYYY-MM-DD-<feature>.md` — implementation plans
+- `.docs/reports/critique-*.md` — critique reports
+- `.docs/reports/review-*.md` — code review reports
+- `.docs/reports/dogfood-*.md` — QA reports
+- `.docs/rules/*.md` — mandatory project constraints (override all default behavior)
