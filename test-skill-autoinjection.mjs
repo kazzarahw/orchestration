@@ -35,6 +35,14 @@ function createSkill(name, description, body, addSubagentStop = false) {
   fs.writeFileSync(path.join(dir, 'SKILL.md'), content);
 }
 
+// Helper: create a mock skill file with custom raw frontmatter string
+function createSkillWithFrontmatter(name, frontmatterStr, body) {
+  const dir = path.join(skillsDir, name);
+  fs.mkdirSync(dir, { recursive: true });
+  const content = `---\n${frontmatterStr}\n---\n\n${body}`;
+  fs.writeFileSync(path.join(dir, 'SKILL.md'), content);
+}
+
 // Create test skills
 createSkill(
   'test-skill-one',
@@ -264,7 +272,7 @@ try {
       'Per-agent override does not inject global skill');
   }
 
-  // ── Test 10: Guard — agent already has skill loaded ────
+  // ── Test 10: Agent with empty skills config injects nothing ────
 
   {
     const config = {
@@ -307,6 +315,61 @@ try {
     await p9['experimental.chat.system.transform']({}, output);
     assert(output.system.length === 0,
       'Empty config injects nothing');
+  }
+
+  // ── Test 12: Folded block scalar (>-) description ──────
+
+  {
+    // Create a skill with >- folded block scalar description
+    createSkillWithFrontmatter(
+      'test-folded-skill',
+      'name: test-folded-skill\ndescription: >-\n  This is a multi-line\n  folded description that should\n  be joined with spaces.',
+      '## Folded Skill Body'
+    );
+
+    const config = {
+      'skill-autoinjection': ['test-folded-skill'],
+      skills: { paths: [] },
+    };
+    const p10 = await SkillAutoinjectionPlugin({ client: {}, directory: testDir }, { skillsDir });
+    await p10.config(config);
+    const output = { system: [] };
+    await p10['experimental.chat.system.transform']({ agent: 'folded-test' }, output);
+
+    const content = output.system[0] || '';
+    assert(content.includes('name="test-folded-skill"'),
+      'Folded scalar: correct skill name');
+    assert(content.includes('description="This is a multi-line folded description that should be joined with spaces."'),
+      'Folded scalar: description lines joined with spaces');
+    assert(content.includes('## Folded Skill Body'),
+      'Folded scalar: skill body preserved');
+  }
+
+  // ── Test 13: HTML escaping in wrapper tag ──────────────
+
+  {
+    createSkillWithFrontmatter(
+      'test-escape-skill',
+      'name: test-escape-skill\ndescription: Use this for "special" characters & <tags>',
+      '## Escape Test Body'
+    );
+
+    const config = {
+      'skill-autoinjection': ['test-escape-skill'],
+      skills: { paths: [] },
+    };
+    const p11 = await SkillAutoinjectionPlugin({ client: {}, directory: testDir }, { skillsDir });
+    await p11.config(config);
+    const output = { system: [] };
+    await p11['experimental.chat.system.transform']({ agent: 'escape-test' }, output);
+
+    const content = output.system[0] || '';
+    assert(content.includes('description="Use this for &quot;special&quot; characters &amp; &lt;tags&gt;"'),
+      'HTML escaping: special chars escaped in description attribute');
+    assert(!content.includes('description="Use this for "special"'),
+      'HTML escaping: unescaped quotes do not break attribute');
+    assert(content.includes('</AUTO_INJECTED_SKILL>'),
+      'HTML escaping: closing wrapper tag present');
   }
 
 } finally {

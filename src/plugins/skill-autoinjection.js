@@ -54,16 +54,32 @@ function parseSkillFile(skillPath) {
 
   // Parse YAML frontmatter (simple key: value format)
   const frontmatter = {};
-  for (const line of frontmatterStr.split('\n')) {
+  const lines = frontmatterStr.split('\n');
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
     const colonIdx = line.indexOf(':');
     if (colonIdx > 0) {
       const key = line.slice(0, colonIdx).trim();
-      // Handle values with leading '>-' (folded block scalars)
       let value = line.slice(colonIdx + 1).trim();
-      if (value.startsWith('>-')) {
-        // Folded block scalar — take the first line for description
-        value = value.slice(2).trim();
+
+      // Handle folded block scalars (>- and >)
+      if (value === '>-' || value === '>') {
+        const stripFinalNewline = value === '>-';
+        const continuationLines = [];
+        while (i + 1 < lines.length) {
+          const nextLine = lines[i + 1];
+          if (/^[ \t]/.test(nextLine)) {
+            continuationLines.push(nextLine.trim());
+            i++;
+          } else {
+            break;
+          }
+        }
+        value = stripFinalNewline
+          ? continuationLines.join(' ')
+          : continuationLines.join('\n');
       }
+
       value = value.replace(/^["']|["']$/g, '');
       frontmatter[key] = value;
     }
@@ -105,7 +121,11 @@ function buildInjectionContent(skillName, skillsDir, cache) {
     return null;
   }
 
-  const content = `<AUTO_INJECTED_SKILL name="${parsed.name}" description="${parsed.description}">
+  // HTML-escape name and description for attribute safety
+  const escapeHtml = (s) =>
+    String(s).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
+  const content = `<AUTO_INJECTED_SKILL name="${escapeHtml(parsed.name)}" description="${escapeHtml(parsed.description)}">
 ${parsed.body}
 
 ${TOOL_MAPPING}
