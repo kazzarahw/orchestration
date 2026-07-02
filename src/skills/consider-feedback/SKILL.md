@@ -1,15 +1,25 @@
 ---
-name: receiving-code-review
-description: Use when receiving code review feedback, before implementing suggestions, especially if feedback seems unclear or technically questionable - requires technical rigor and verification, not performative agreement or blind implementation
+name: consider-feedback
+description: Use when receiving code review or critique feedback, before implementing suggestions — requires technical rigor and verification, not performative agreement or blind implementation
 ---
 
-# Code Review Reception
+# Consider Feedback
 
 ## Overview
 
-Code review requires technical evaluation, not emotional performance.
+Feedback requires technical evaluation, not emotional performance. This applies to all feedback sources: Critique (spec/plan review), Code Review (implementation review), and any subagent findings.
 
 **Core principle:** Verify before implementing. Ask before assuming. Technical correctness over social comfort.
+
+## Sources This Applies To
+
+| Source | What it reviews | When it arrives |
+|--------|----------------|-----------------|
+| **Critique Gate** | Specs and plans before implementation | After design/planning |
+| **Review Gate** | Implementation code after task completion | After each task and at whole-branch |
+| **Subagent findings** | Any subagent's output during development | Throughout the workflow |
+
+The response pattern is the same regardless of source: verify before implementing, push back with technical reasoning when wrong, implement one item at a time with testing.
 
 ## The Response Pattern
 
@@ -58,11 +68,23 @@ You understand 1,2,3,6. Unclear on 4,5.
 
 ## Source-Specific Handling
 
-### From your human partner
+### From your human partner (Critique or direct feedback)
 - **Trusted** - implement after understanding
 - **Still ask** if scope unclear
 - **No performative agreement**
 - **Skip to action** or technical acknowledgment
+
+### From Critique Gate (spec/plan review)
+- Feedback targets design decisions, scope, and requirements
+- Verify each criticism against the actual spec or plan text
+- If feedback contradicts stated requirements, point out the contradiction
+- Implement one spec change at a time, re-verify consistency
+
+### From Code Review (implementation review)
+- Feedback targets code correctness, test quality, and design
+- Check: Is the reviewer's suggested fix correct for THIS codebase?
+- Check: Does the fix maintain existing test coverage?
+- Implement one finding at a time, test each before moving on
 
 ### From External Reviewers
 ```

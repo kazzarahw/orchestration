@@ -1,9 +1,9 @@
 ---
-name: writing-plugins
-description: Use when creating, editing, or troubleshooting OpenCode plugins, custom tools, custom slash-commands, TUI extensions, or hooking into OpenCode's event lifecycle. Do NOT use for MCP server config or writing agents/skills/rules.
+name: create-plugin
+description: Use when creating, editing, or troubleshooting OpenCode plugins — not for MCP server config or writing agents/skills/rules
 ---
 
-# Writing OpenCode Plugins
+# Create Plugin
 
 ## Overview
 

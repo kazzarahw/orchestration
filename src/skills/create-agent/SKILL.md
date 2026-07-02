@@ -1,9 +1,9 @@
 ---
-name: writing-agents
-description: Use when creating or editing agent/subagent definitions, writing agent system prompts, structuring YAML frontmatter for agents, or setting up multi-agent pipelines. Do NOT use for implementing features or fixing bugs.
+name: create-agent
+description: Use when creating or editing agent/subagent definitions, writing agent system prompts, or structuring YAML frontmatter — not for implementing features
 ---
 
-# Writing Agents
+# Create Agent
 
 ## Overview
 

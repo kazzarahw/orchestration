@@ -1,9 +1,11 @@
 ---
-name: maximizing-information-density
+name: optimize-tokens
 description: Use when producing any natural-language output — maximizes information density (term-of-art substitution, phrasal packing, nominalization, given-new ordering, quantification, contrastive definitions, BNF, implicature, presupposition packing) to minimize output tokens without losing technical accuracy; lossy techniques are gated to human-only audiences.
+metadata:
+  alias: maximizing-information-density
 ---
 
-# Maximizing Information Density
+# Optimize Tokens
 
 Spend output tokens at the highest accurate **bits-per-token**. This is *compression of encoding*, not *omission of content* and not broken grammar. Same meaning, fewer tokens — achieved by word and structure choice, never by dropping what the reader needs.
 

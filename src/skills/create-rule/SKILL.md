@@ -1,9 +1,9 @@
 ---
-name: writing-rules
-description: Use when creating or updating a guideline document (naming conventions, coding standards, architectural rules, style guides, commit conventions) intended to direct agent behavior in a codebase — before writing the document itself
+name: create-rule
+description: Use when creating or updating a guideline document intended to direct agent behavior — before writing the document itself
 ---
 
-# Writing Rules Documents for Agent Guidance
+# Create Rule
 
 ## Overview
 
@@ -28,8 +28,8 @@ digraph when_to_use {
     "Need to guide agent\nbehavior consistently?" [shape=diamond];
     "Does a doc already\nexist for this?" [shape=diamond];
     "Is it project-specific\nor cross-project?" [shape=diamond];
-    "writing-rules" [shape=box];
-    "Use writing-skills" [shape=box];
+    "create-rule" [shape=box];
+    "Use create-skill" [shape=box];
     "Skip — update\nexisting doc" [shape=box];
     "Add to CLAUDE.md\nor AGENTS.md" [shape=box];
 
@@ -37,13 +37,13 @@ digraph when_to_use {
     "Need to guide agent\nbehavior consistently?" -> "Does a doc already\nexist for this?" [label="no — existing doc?"];
     "Does a doc already\nexist for this?" -> "Skip — update\nexisting doc" [label="yes"];
     "Does a doc already\nexist for this?" -> "Is it project-specific\nor cross-project?" [label="no"];
-    "Is it project-specific\nor cross-project?" -> "writing-rules" [label="project-specific\nconventions"];
-    "Is it project-specific\nor cross-project?" -> "Use writing-skills" [label="cross-project\nreusable technique"];
+    "Is it project-specific\nor cross-project?" -> "create-rule" [label="project-specific\nconventions"];
+    "Is it project-specific\nor cross-project?" -> "Use create-skill" [label="cross-project\nreusable technique"];
     "Is it project-specific\nor cross-project?" -> "Add to CLAUDE.md\nor AGENTS.md" [label="≤5 rules\nno sub-categories"];
 }
 ```
 
-**Use writing-rules for:**
+**Use create-rule for:**
 - Naming conventions (functions, predicates, values, modules, files)
 - Coding standards and style guides (formatting, idioms, patterns)
 - Architectural rules (dependency direction, module boundaries, data flow)
@@ -52,11 +52,11 @@ digraph when_to_use {
 
 **Do NOT use for:**
 - Implementation plans (use `writing-plans`)
-- Reusable agent skills (use `writing-skills`)
+- Reusable agent skills (use `create-skill`)
 - One-off instructions (put in a task prompt)
-- Agent definitions and system prompts (use `writing-agents`)
+- Agent definitions and system prompts (use `create-agent`)
 
-**If the rule set is small (≤5 rules, no subcategories):** Put it in `CLAUDE.md`, `AGENTS.md`, or `GEMINI.md` instead of a separate document. Use `writing-rules` only when the document would be too long for those files (the threshold: when the document needs its own table of contents).
+**If the rule set is small (≤5 rules, no subcategories):** Put it in `CLAUDE.md`, `AGENTS.md`, or `GEMINI.md` instead of a separate document. Use `create-rule` only when the document would be too long for those files (the threshold: when the document needs its own table of contents).
 
 ## The Process
 
@@ -74,7 +74,7 @@ If the document will govern ≤5 rules within a single category (e.g., just comm
 
 ### Phase U: Update Path (for Existing Documents)
 
-When the user invokes `writing-rules` to update an existing rules document, use this path instead of Phases 1-5:
+When the user invokes `create-rule` to update an existing rules document, use this path instead of Phases 1-5:
 
 1. **Audit for drift.** Read the existing document. Then audit the codebase against it:
    - Which rules are being followed? Which are routinely violated?
