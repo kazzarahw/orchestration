@@ -156,7 +156,7 @@ permission:
 
 | Value | When to Use |
 |-------|-------------|
-| `primary` | Main agent users interact with directly (e.g., the develop agent) |
+| `primary` | Main agent users interact with directly (e.g., the orchestrate agent) |
 | `subagent` | Agent invoked by other agents, never directly by users |
 | `all` | Agent usable both as primary and as subagent |
 

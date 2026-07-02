@@ -47,7 +47,7 @@ Agent definitions live at `src/agents/<name>.md`. YAML frontmatter controls Open
 - `permission` — per-tool allow/deny map
 - `temperature`, `color`
 
-The `src/agents/orchestrate.md` primary agent is the main entry point for all development work. It orchestrates the development lifecycle: brainstorm + critique (Design) → plan + critique (Plan) → implement + review (Build) → final Review + dogfood, delegating code changes to Build and implementer subagents and never writing implementation code directly.
+The `src/agents/orchestrate.md` primary agent is the main entry point for all development work. It orchestrates the development lifecycle: brainstorm + critique (Design) → plan + critique (Plan) → implement + review (Build) → final Review + dogfood, delegating code changes to the build subagent and never writing implementation code directly.
 
 ## Plugins
 
@@ -60,11 +60,11 @@ The `src/agents/orchestrate.md` primary agent is the main entry point for all de
 | Path | Content |
 |------|---------|
 | `.docs/designs/` | Design documents (from brainstorming skill) |
-| `.docs/plans/` | Implementation plans (from writing-plans skill) |
+| `.docs/plans/` | Implementation plans (from plan agent) |
 | `.docs/rules/*.md` | Mandatory project constraints (from writing-rules skill) |
 | `.docs/reports/` | Critique, review, and dogfood QA reports |
 
-Rules in `.docs/rules/` override all skill and default behavior — the develop agent re-reads them after any working directory change.
+Rules in `.docs/rules/` override all skill and default behavior — the orchestrator agent re-reads them after any working directory change.
 
 ## SDD Scripts
 
@@ -87,7 +87,7 @@ This repo supports multiple runtimes. On OpenCode, skills are invoked with the `
 ## Key Skill Dependency Chain
 
 `skill-autoinjection` plugin → loads `optimize-tokens` + `use-todo` on every session turn  
-Orchestrate → delegates Design (brainstorming embedded) → Plan (writing-plans embedded) → Build (subagent-driven-development)  
-→ final Review + optional Dogfood → `finishing-a-development-branch`
+Orchestrate → delegates Design (brainstorming embedded) → Plan (plan agent) → Build (subagent-driven-development)  
+→ final Review + optional Dogfood → branch finish (embedded in orchestrate R4)
 
 Cross-cutting (apply throughout): `systematic-debugging`, `test-driven-development`, `verification-before-completion`, `use-git`.

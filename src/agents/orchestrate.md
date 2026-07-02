@@ -246,7 +246,7 @@ If the implementation produces an interactive CLI, TUI, or terminal-based progra
 
 ### Phase R4: Finish (Merge/PR/Discard)
 
-Apply the finishing-a-development-branch process:
+Apply the branch finishing process (embedded from finishing-a-development-branch):
 
 **Step 1: Verify Tests**
 ```bash
