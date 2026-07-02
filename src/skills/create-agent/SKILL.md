@@ -56,7 +56,7 @@ Executes a specific stage in a multi-step process. Passes work to next stage.
 
 **Structure:** Frontmatter + Strict Boundaries + Inputs + Workflow steps + Output format + State update + Handoff
 
-**Example agents from reference:** `orchestrate`, `implement`, `architect`, `review`, `qa`, `playwright`, `conductor-validator`
+**Example agents from reference:** `orchestrate`, `build`, `architect`, `review`, `qa`, `playwright`, `conductor-validator`
 
 ### Capability/Expert Agent
 

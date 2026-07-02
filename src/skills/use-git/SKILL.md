@@ -1,13 +1,13 @@
 ---
 name: use-git
-description: Use when needing isolated workspaces, branch management, or git workflow guidance during development — ensures work happens in isolated workspaces and follows commit conventions
+description: Use when needing isolated workspaces, branch management, or git workflow guidance during development
 ---
 
 # Use Git
 
 ## Overview
 
-Ensure work happens in an isolated workspace. Prefer platform-native worktree tools. Fall back to manual git worktrees when no native tool is available.
+Work in isolated workspaces. Prefer native worktree tools. Fall back to git worktrees.
 
 **Core principle:** Detect existing isolation first. Use native tools. Fall back to git. Never fight the harness.
 
@@ -27,7 +27,7 @@ git rev-parse --show-superproject-working-tree 2>/dev/null
 ## Step 1: Create Isolated Workspace
 
 ### 1a. Native Worktree Tools (preferred)
-If platform provides a worktree tool, use it. Only proceed to 1b if no native tool.
+If platform provides a worktree tool, use it. Otherwise proceed to 1b.
 
 ### 1b. Git Worktree Fallback
 
@@ -42,9 +42,9 @@ git worktree add "$path" -b "$BRANCH_NAME"
 
 ## Step 2: Branch Isolation
 
-**Never implement on main/master without explicit user consent.** Always use a feature branch created via worktree.
+**Never implement on main/master without consent.** Use a feature branch via worktree.
 
-Record the baseline HEAD at worktree creation time for later cherry-pick and review-package generation:
+Record baseline HEAD at creation for cherry-pick and review-package:
 
 ```bash
 BASE_SHA=$(git rev-parse HEAD)
@@ -71,7 +71,7 @@ Resolve conflicts with `git cherry-pick --continue` or `--abort` if unresolvable
 
 ## Step 5: Cleanup
 
-**Provenance-based cleanup:** Only remove worktrees you created. Check path under `.worktrees/` or `worktrees/`. Never remove harness-owned workspaces.
+**Provenance-based:** Only remove worktrees you created. Check path under `.worktrees/` or `worktrees/`. Never remove harness-owned.
 
 ```bash
 git worktree remove "$WORKTREE_PATH"

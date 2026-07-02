@@ -132,11 +132,11 @@ Search for relevant information:
 
 ### Phase 3: Offline Research (Optional)
 
-If the research relates to the existing codebase, spawn `explore` subagents:
+If the research relates to the existing codebase, spawn `general` subagents:
 
 ```
 Task tool:
-  subagent_type: "explore"
+  subagent_type: "general"
   description: "[what to explore]"
   prompt: "[specific exploration task]"
 ```
