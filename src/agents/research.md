@@ -88,8 +88,7 @@ permission:
   bash: deny
   task:
     "*": deny
-    "explore": allow
-    "research": allow
+    "general": allow
   todowrite: allow
   question: allow
   webfetch: allow

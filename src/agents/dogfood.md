@@ -376,53 +376,14 @@ Each finding must be independently verifiable — another agent should be able t
 ## Report File
 
 After writing your report to your final message, ALSO write it to a report file:
-`docs/review/dogfood-YYYY-MM-DD-<program-name>.md`
+`.docs/reports/dogfood-YYYY-MM-DD-<program-name>.md`
 
 This ensures the parent agent can read your full findings even if the platform
 drops your final message content. Use the `write` tool to create this file.
 
 **Always write the file before returning your final message.**
 
-## Quick Reference: Essential tmux Commands
-
-### Session Lifecycle
-| Action | Command |
-|--------|---------|
-| Create detached session | `tmux new-session -d -s <name> '<cmd>'` |
-| Kill session | `tmux kill-session -t <name>` |
-| List sessions | `tmux list-sessions` |
-
-### Sending Input
-| Action | Command |
-|--------|---------|
-| Type and execute | `tmux send-keys -t <name> "input" Enter` |
-| Ctrl+C | `tmux send-keys -t <name> C-c` |
-| Ctrl+D | `tmux send-keys -t <name> C-d` |
-| Ctrl+Z | `tmux send-keys -t <name> C-z` |
-| Multi-line paste | `tmux send-keys -t <name> "line1" Enter "line2"` |
-| Literal (no key translation) | `tmux send-keys -t <name> -l "raw text"` |
-
-### Capturing Output
-| Action | Command |
-|--------|---------|
-| Capture visible content | `tmux capture-pane -t <name> -p` |
-| Capture all history | `tmux capture-pane -t <name> -p -S -` |
-| Capture with trailing blanks | `tmux capture-pane -t <name> -p -J` |
-
-### State Inspection
-| Action | Command |
-|--------|---------|
-| Pane alive? | `tmux display-message -p -t <name> '#{pane_dead}'` |
-| Exit status (if dead) | `tmux display-message -p -t <name> '#{pane_dead_status}'` |
-| Cursor position | `tmux display-message -p -t <name> '#{cursor_x},#{cursor_y}'` |
-| In a mode? | `tmux display-message -p -t <name> '#{pane_in_mode}'` |
-| Pane dimensions | `tmux display-message -p -t <name> '#{pane_width}x#{pane_height}'` |
-
-### Resize
-| Action | Command |
-|--------|---------|
-| Absolute resize | `tmux resize-pane -t <name> -x 80 -y 24` |
-| Relative resize | `tmux resize-pane -t <name> -L 10` |
+For detailed tmux command reference, load the `use-tmux` skill via the `skill` tool. The skill provides complete command tables for: session lifecycle, sending input, capturing output, state inspection, and resize operations.
 
 ## Behavioral Guidelines
 
@@ -504,7 +465,7 @@ If you catch yourself doing any of these, you are NOT dogfooding correctly:
 
 ## Stopping Conditions
 
-- ✅ **Done:** Dogfood QA report written to `docs/review/dogfood-*.md` and returned as final message with all findings documented, tmux session cleaned up
+- ✅ **Done:** Dogfood QA report written to `.docs/reports/dogfood-*.md` and returned as final message with all findings documented, tmux session cleaned up
 - ⏹️ **Blocked:** tmux unavailable, no target program provided, permissions prevent testing — escalate with specific reason
 - ⛔ **Out of scope:** Asked to implement features, review code statically, debug production issues, or make design decisions — decline and recommend dispatching the appropriate agent
 
