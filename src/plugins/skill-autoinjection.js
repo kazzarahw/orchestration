@@ -1,9 +1,10 @@
 /**
  * Skill Autoinjection Plugin for OpenCode.ai
  *
- * Reads a `skill-autoinjection` key from opencode.jsonc (array of skill names)
- * and injects those skills' content into agent system prompts via the
- * experimental.chat.system.transform hook.
+ * Injects skill content into agent system prompts via the
+ * experimental.chat.system.transform hook. Reads skill names to inject from
+ * opencode.jsonc's `experimental.skill-autoinjection` key (if OpenCode passes
+ * it through), falling back to a hardcoded default list.
  *
  * Supports per-agent frontmatter override via agentConfig.skills.
  */
@@ -137,7 +138,16 @@ ${TOOL_MAPPING}
 
 export const SkillAutoinjectionPlugin = async ({ client, directory }, options = {}) => {
   const skillsDir = options.skillsDir || DEFAULT_SKILLS_DIR;
-  let globalSkillNames = []; // from config["skill-autoinjection"]
+  let globalSkillNames = []; // from config, or default list
+
+  // Default skills to inject when no config override is provided.
+  // OpenCode ≥1.17 strips unknown keys from opencode.jsonc, so the
+  // experimental.skill-autoinjection key may not reach the plugin.
+  // This fallback ensures the plugin works out of the box.
+  // Override via SKILL_AUTOINJECTION env var (comma-separated names).
+  const DEFAULT_SKILLS = (process.env.SKILL_AUTOINJECTION
+    ? process.env.SKILL_AUTOINJECTION.split(',').map(s => s.trim()).filter(Boolean)
+    : ['optimize-tokens', 'use-todo']);
 
   // Per-instance caches
   const injectionCache = new Map();
@@ -156,10 +166,14 @@ export const SkillAutoinjectionPlugin = async ({ client, directory }, options = 
         config.skills.paths.push(skillsDir);
       }
 
-      // Read skill-autoinjection config
-      if (config['skill-autoinjection'] && Array.isArray(config['skill-autoinjection'])) {
-        globalSkillNames = config['skill-autoinjection'];
-      }
+      // Read skill names from config (experimental namespace — OpenCode 1.17+).
+      // Fall back to top-level key for older versions.
+      // If neither provides a value, use the hardcoded default list.
+      const injectionConfig = (config.experimental && config.experimental['skill-autoinjection'])
+        || config['skill-autoinjection'];
+      globalSkillNames = (injectionConfig && Array.isArray(injectionConfig))
+        ? injectionConfig
+        : DEFAULT_SKILLS;
     },
 
     /**

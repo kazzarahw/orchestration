@@ -1,11 +1,15 @@
 {
-  "plugins": [
+  "plugin": [
     "plugins/skill-autoinjection.js"
     // If goal.ts is in use, add it here after skill-autoinjection:
     // "plugins/goal.ts"
-  ],
-  "skill-autoinjection": [
-    "optimize-tokens",
-    "use-todo"
   ]
+  // Skills injected by skill-autoinjection plugin (defaults):
+  //   optimize-tokens  — token-optimized output formatting
+  //   use-todo         — task list management
+  //
+  // Defaults are hardcoded in the plugin as fallback when OpenCode's config
+  // parser strips custom keys. To override, pass the skill list via
+  // SKILL_AUTOINJECTION environment variable (comma-separated names), or
+  // modify DEFAULT_SKILLS in src/plugins/skill-autoinjection.js.
 }
