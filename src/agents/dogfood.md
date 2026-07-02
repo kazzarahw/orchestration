@@ -1,4 +1,5 @@
 ---
+name: dogfood
 description: >-
   Use this agent to dogfood QA test a program or codebase through direct,
   interactive usage as a real user would — instead of static code review or
@@ -75,8 +76,6 @@ permission:
   webfetch: deny
   websearch: deny
 ---
-
-<!-- superpowers-agent: dogfood v1 -->
 
 # Dogfood Agent
 

@@ -174,7 +174,7 @@ Use the Subagent-Driven Development (SDD) pattern to execute each task:
       - Record Minor findings in progress ledger for whole-branch review triage
    c. **Mark task complete** in todos and progress ledger
 
-**Parallel dispatch rules** (from dispatching-parallel-agents skill):
+**Parallel dispatch rules** (embedded from dispatching-parallel-agents):
 - Only invoke parallel dispatch when:
   - A subagent returns BLOCKED and the blocker can be researched independently of the main task flow
   - Multiple independent test failures across different subsystems need parallel root-cause analysis
@@ -185,7 +185,7 @@ Use the Subagent-Driven Development (SDD) pattern to execute each task:
 **SDD scripts reference:**
 - `scripts/task-brief PLAN_FILE TASK_N [OUTFILE]` — extracts one task from a plan into a brief file
 - `scripts/review-package BASE HEAD [OUTFILE]` — generates a diff package (commits + stat + diff) for a reviewer subagent
-- `scripts/sdd-workspace` — resolves/creates `.superpowers/sdd/` (gitignored artifact dir)
+- `scripts/sdd-workspace` — resolves/creates `.opencode/sdd/` (gitignored artifact dir)
 
 **File handoffs:**
 - **Task brief:** before dispatching, run `scripts/task-brief PLAN_FILE N` — it extracts the task's full text to a uniquely named file
@@ -194,12 +194,12 @@ Use the Subagent-Driven Development (SDD) pattern to execute each task:
 - Fix dispatches append their fix report to the same report file
 
 **Durable progress:**
-- Maintain a progress ledger at `.superpowers/sdd/progress.md`
+- Maintain a progress ledger at `.opencode/sdd/progress.md`
 - After each clean review, append: `Task N: complete (commits <base7>..<head7>, review clean)`
 - After compaction, trust the ledger and `git log` over recollection
 - Check for existing ledger at skill start to resume interrupted sessions
 
-**Per-task review requests** (from requesting-code-review skill):
+**Per-task review requests** (embedded from requesting-code-review):
 - Get commit range: `BASE_SHA=$(git merge-base origin/main HEAD)`, `HEAD_SHA=$(git rev-parse HEAD)`
 - Dispatch `@review` with: description of what was built, requirements, BASE_SHA, HEAD_SHA
 - Fix Critical issues immediately, fix Important issues before proceeding, note Minor
@@ -225,7 +225,7 @@ The `@review` agent checks:
 - Integration — cross-task consistency, emergent behavior, design debt, broken contracts, regression risk?
 - Production readiness — migrations, backward compat, docs?
 
-**Whole-branch review requests** (from requesting-code-review skill):
+**Whole-branch review requests** (embedded from requesting-code-review):
 - Get commit range from branch start
 - Dispatch `@review` with: plan/spec, diff file, minor issues list
 - Act on feedback: fix CRIT/IMP, note MINOR/LOW

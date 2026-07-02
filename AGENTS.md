@@ -15,11 +15,11 @@ Source files live under `src/` and get installed to `~/.config/opencode/` via `i
 | `src/skills/` | `~/.config/opencode/skills/` | Skill documents |
 | `src/agents/` | `~/.config/opencode/agents/` | OpenCode agent definitions |
 | `src/plugins/` | `~/.config/opencode/plugins/` | OpenCode plugins |
-| `src/docs/` | `~/.config/opencode/docs/` | Spec, plan, review, and rule templates |
+| `.docs/` | project root | Design specs, plans, review reports, and project rules |
 | `src/AGENTS.md` | `~/.config/opencode/AGENTS.md` | Global agent rules |
 | `src/CLAUDE.md` | `~/.config/opencode/CLAUDE.md` | Global agent rules (Claude Code alias) |
 
-Root-level files (`AGENTS.md`, `CLAUDE.md`, `docs → src/docs`, `README.md`) are for *this* repository itself. The `src/` directory contains the source that gets deployed to `~/.config/opencode/`.
+Root-level files (`AGENTS.md`, `CLAUDE.md`, `.docs/`, `README.md`) are for *this* repository itself. The `src/` directory contains the source that gets deployed to `~/.config/opencode/`.
 
 ## Skills
 
@@ -36,7 +36,7 @@ Skills live at `src/skills/<name>/SKILL.md`. Each file has YAML frontmatter (`na
 
 Check with: `wc -w src/skills/<name>/SKILL.md`
 
-**Writing new skills** currently follows the TDD process in `src/skills/writing-skills/SKILL.md` (Iron Law: no skill without a failing pressure-scenario test first), but check with the user if conventions are evolving.
+**Creating new skills** currently follows the TDD process in `src/skills/create-skill/SKILL.md` (Iron Law: no skill without a failing pressure-scenario test first), but check with the user if conventions are evolving.
 
 ## Agents
 
@@ -47,11 +47,11 @@ Agent definitions live at `src/agents/<name>.md`. YAML frontmatter controls Open
 - `permission` — per-tool allow/deny map
 - `temperature`, `color`
 
-The `src/agents/develop.md` primary agent is the main entry point for all development work. It runs a full lifecycle: design → plan → implement → review → finish, delegating code changes to implementer subagents and never writing implementation code directly.
+The `src/agents/orchestrate.md` primary agent is the main entry point for all development work. It orchestrates the development lifecycle: brainstorm + critique (Design) → plan + critique (Plan) → implement + review (Build) → final Review + dogfood, delegating code changes to Build and implementer subagents and never writing implementation code directly.
 
 ## Plugins
 
-`src/plugins/superpowers.js` — OpenCode plugin that injects the `using-superpowers` skill into the first user message of each session and registers `skills/` as a skills path in OpenCode config. Uses module-level cache to avoid repeated disk reads.
+`src/plugins/skill-autoinjection.js` — OpenCode plugin that injects `optimize-tokens` and `use-todo` skills into every session turn via the `system.transform` hook. Replaces the former `using-superpowers` skill + `superpowers.js` autoinjection pair.
 
 `src/plugins/goal.ts` — OpenCode plugin providing the `/goal <description>` command. Implements a state machine (`working → review → done/stalled/cancelled`) with stagnation detection, auto-continuation via `session.idle` events, and three tools: `goal_plugin_get`, `goal_plugin_update`, `goal_plugin_verify`. State persists to `.opencode/goals/state.json`.
 
@@ -59,39 +59,35 @@ The `src/agents/develop.md` primary agent is the main entry point for all develo
 
 | Path | Content |
 |------|---------|
-| `src/docs/plans/design-YYYY-MM-DD-<topic>.md` | Design documents (from brainstorming skill) |
-| `src/docs/plans/plan-YYYY-MM-DD-<feature>.md` | Implementation plans (from writing-plans skill) |
-| `src/docs/rules/*.md` | Mandatory project constraints (from writing-rules skill) |
-| `src/docs/review/critique-*.md` | Critique reports (adversarial spec/plan review) |
-| `src/docs/review/review-*.md` | Code review reports (per-task and whole-branch) |
-| `src/docs/review/dogfood-*.md` | Dogfood QA reports (interactive testing) |
-| `src/docs/research/` | Research outputs |
+| `.docs/designs/` | Design documents (from brainstorming skill) |
+| `.docs/plans/` | Implementation plans (from writing-plans skill) |
+| `.docs/rules/*.md` | Mandatory project constraints (from writing-rules skill) |
+| `.docs/reports/` | Critique, review, and dogfood QA reports |
 
-Rules in `src/docs/rules/` override all skill and default behavior — the develop agent re-reads them after any working directory change.
+Rules in `.docs/rules/` override all skill and default behavior — the develop agent re-reads them after any working directory change.
 
 ## SDD Scripts
 
 `src/skills/subagent-driven-development/scripts/` contains three shell scripts used during subagent-driven development:
-- `sdd-workspace` — resolves/creates `.superpowers/sdd/` (gitignored artifact dir)
+- `sdd-workspace` — resolves/creates `.opencode/sdd/` (gitignored artifact dir)
 - `task-brief PLAN_FILE TASK_N [OUTFILE]` — extracts one task from a plan into a brief file
 - `review-package BASE HEAD [OUTFILE]` — generates a diff package (commits + stat + diff) for a reviewer subagent
 
 ## Graphviz Diagrams
 
-Skills use `dot` code blocks for flowcharts. Render them:
+Skills use `dot` code blocks for flowcharts. Install graphviz (`apt install graphviz`) and render:
 ```bash
-./src/skills/writing-skills/render-graphs.js src/skills/<name>           # each diagram separately
-./src/skills/writing-skills/render-graphs.js src/skills/<name> --combine # all in one SVG
+dot -Tsvg -o diagram.svg diagram.dot
 ```
 
 ## Platform Targets
 
-This repo supports multiple runtimes. `src/skills/using-superpowers/references/` has per-platform tool mapping docs. On Claude Code, skills are invoked with the `Skill` tool and "dispatch a subagent" maps to the `Agent` tool.
+This repo supports multiple runtimes. On OpenCode, skills are invoked with the `Skill` tool and "dispatch a subagent" maps to the `Task` tool with the `subagent_type` parameter.
 
 ## Key Skill Dependency Chain
 
-`using-superpowers` → loaded on every session start  
-→ `brainstorming` → `writing-plans` → `subagent-driven-development` or `executing-plans`  
-→ `requesting-code-review` + `receiving-code-review` → `finishing-a-development-branch`
+`skill-autoinjection` plugin → loads `optimize-tokens` + `use-todo` on every session turn  
+Orchestrate → delegates Design (brainstorming embedded) → Plan (writing-plans embedded) → Build (subagent-driven-development)  
+→ final Review + optional Dogfood → `finishing-a-development-branch`
 
-Cross-cutting (apply throughout): `systematic-debugging`, `test-driven-development`, `verification-before-completion`, `using-git-worktrees`.
+Cross-cutting (apply throughout): `systematic-debugging`, `test-driven-development`, `verification-before-completion`, `use-git`.
