@@ -51,7 +51,7 @@ digraph when_to_use {
 - Any document whose audience includes other agents and whose purpose is enforcing consistency
 
 **Do NOT use for:**
-- Implementation plans (use `writing-plans`)
+- Implementation plans (use the plan agent)
 - Reusable agent skills (use `create-skill`)
 - One-off instructions (put in a task prompt)
 - Agent definitions and system prompts (use `create-agent`)

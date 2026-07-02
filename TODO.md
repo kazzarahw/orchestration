@@ -5,3 +5,4 @@
 - Move some behaviors to agent-specific instructions then enforce stricter delegation for tasks. Could remove some of the hyperspecific skills that don't need to exist for most agents.
 - Implement proper agent/skill/etc. docs for consistent construction of each.
 - Fix install script. Should put backup in `~/.config/opencode/.bak/...` and should not clear entire config dir, just the folders/files it's replacing (to keep things like `node_modules/`, `.git/` and so on).
+- Maybe remove read/write/edit access from Develop outside of `docs/`?

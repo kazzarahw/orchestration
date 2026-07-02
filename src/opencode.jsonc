@@ -1,8 +1,8 @@
 {
   "plugins": [
-    "src/plugins/skill-autoinjection.js"
+    "plugins/skill-autoinjection.js"
     // If goal.ts is in use, add it here after skill-autoinjection:
-    // "src/plugins/goal.ts"
+    // "plugins/goal.ts"
   ],
   "skill-autoinjection": [
     "optimize-tokens",

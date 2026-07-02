@@ -1,4 +1,5 @@
 ---
+name: review
 description: >-
   Use this agent to review implementation diffs in per-task or whole-branch mode.
   Cooperative review for spec compliance and code quality. Called in two
