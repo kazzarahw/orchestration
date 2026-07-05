@@ -1,0 +1,88 @@
+# Platform Capability Verification (P0)
+
+**Date:** 2026-07-05
+**OpenCode version:** 1.17.13
+**Method:** throwaway `probe-injection.js` plugin + `opencode run` / `opencode debug`
+against the free `deepseek-v4-flash-free` model. Plan reference:
+`.docs/plans/plan-2026-07-05-workflow-enforcement-foundation.md` (Task 1).
+
+## Verdicts
+
+| Verdict | Result | Confidence |
+|---------|--------|-----------|
+| `INJECTION_HOOK` | **`system.transform` works** (so does `messages.transform`, with caveats) | Proven |
+| `EDIT_GLOB_ENFORCED` | **yes** — glob `permission.edit` denies at tool-execution time | Proven |
+| `DEFAULT_AGENT_WORKS` | **yes** | Proven |
+
+## 1. Injection hook — `system.transform` is LIVE on 1.17.13
+
+A marker `PROBE_MARKER_SYSTEM_7F3A` pushed via `experimental.chat.system.transform`
+(`output.system.push(string)`) was **echoed back by the model**, proving the mutation
+reaches the assembled prompt.
+
+- **This contradicts research issue #17100** ("system.transform silently discarded").
+  That issue does **not** apply to 1.17.13 — the hook works. The current
+  `skill-autoinjection.js` (which uses `system.transform`) was therefore **not** a dead
+  no-op on this version; `optimize-tokens`/`use-todo` have been injecting.
+- Hook fires per chat request (observed firing for both the title sub-agent and the main
+  agent). `output.system` is a `string[]`; pushing a string is safe.
+
+### `messages.transform` also live — but needs the right shape
+`experimental.chat.messages.transform` also fires and its mutations reach the pipeline
+(a malformed push **crashed** `SessionPrompt.run` on `V.parts.length`, proving the pushed
+entry is consumed). OpenCode messages are **not** `{role, content}` — the real shape is:
+
+```json
+{"info":{"role":"user","time":{...},"agent":"...","model":{...},"id":"msg_...","sessionID":"ses_..."},
+ "parts":[{"type":"text","text":"...","id":"prt_..."}]}
+```
+
+`messages.transform` `input` keys were empty (`[]`); `output` exposes `messages`.
+
+**Decision:** keep `system.transform` in `skill-autoinjection.js` — it works, is simpler
+(plain strings), and needs no shape juggling. **No hook swap is required.** This simplifies
+plan Task 3 (only: add `workflow-gateway` to the default list + drop `TOOL_MAPPING`).
+
+## 2. Permission glob enforcement — confirmed
+
+Temporary gate on the `design` agent:
+```yaml
+edit:
+  "**": deny
+  ".docs/**": allow
+```
+- `opencode debug agent design` resolved to the two `edit` rules with glob `pattern`s.
+- `opencode run --agent design "…create probe-src.ts…"` → file **not created**; log:
+  `evaluated permission=edit pattern=probe-src.ts action.pattern=** action.action=deny`,
+  tool returned `Write probe-src.ts failed — The user has specified a rule which prevents
+  you from using this specific tool call`.
+- The deny reason is fed to the model, which then correctly proposed dispatching the Build
+  agent — a useful side effect (the gate nudges toward the intended routing).
+
+Permissions are a last-match-wins rule list of `{permission, action, pattern}` enforced at
+tool-execution time. The design's deny-source/allow-docs gate (plan Task 5) is viable as
+specified — no fallback needed.
+
+## 3. `default_agent` — confirmed
+
+`"default_agent": "orchestrate"` in `opencode.jsonc`:
+- `opencode debug config` → `"default_agent": "orchestrate"` (survives parsing).
+- `opencode run "hi"` with no `--agent` → logs `agent=orchestrate mode=primary`.
+
+## Operational notes for later tasks
+
+- **Deploy loop:** edit `src/` → `./install.sh` → `opencode run …` (fresh config each run;
+  no restart needed for one-shots).
+- **Model latency:** `deepseek-v4-flash-free` is slow against large prompts (the orchestrate
+  system prompt timed out introspection prompts at 2 min). Prefer **deterministic** checks
+  (`debug agent` / `debug config` / file-existence) over asking the model to introspect;
+  keep behavioral probes short and give generous timeouts (≥240 s).
+- **Harmless noise:** the `gpt-5.4-nano … Missing API key` title-model error on stderr does
+  not affect the main run.
+
+## Plan adjustments arising from P0
+
+1. **Task 3:** do **not** swap the injection hook. Keep `system.transform`; only add
+   `workflow-gateway` to `DEFAULT_SKILLS` and delete `TOOL_MAPPING`. Update the Task 3
+   live-confirm step to use a short prompt / generous timeout.
+2. **Task 5:** glob gate confirmed enforceable — the coarse fallback (Step 3) is not needed.
