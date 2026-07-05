@@ -256,8 +256,8 @@ phase; do not gold-plate the wording here.
 - [ ] **Step 1: Update the unit test first (TDD)**
 
 In `tests/test-skill-autoinjection.mjs`, change assertions to the new contract:
-- the transform hook under test is the one confirmed in Task 1 (default:
-  `experimental.chat.messages.transform`);
+- the transform hook under test remains `experimental.chat.system.transform` (confirmed
+  working on 1.17.13 in Task 1 — **no hook swap**);
 - injected content no longer contains `**Tool Mapping for OpenCode:**`;
 - the default injected skill list is `['workflow-gateway','optimize-tokens','use-todo']`;
 - injected content still contains the skill body wrapped in `<AUTO_INJECTED_SKILL …>`.
@@ -280,11 +280,10 @@ In `src/plugins/skill-autoinjection.js`:
 - Change `DEFAULT_SKILLS` default → `['workflow-gateway', 'optimize-tokens', 'use-todo']`.
 - Delete the `TOOL_MAPPING` constant and remove it from `buildInjectionContent`'s template
   so `<AUTO_INJECTED_SKILL>` wraps only the body.
-- Rename the hook key from `'experimental.chat.system.transform'` to the hook confirmed in
-  Task 1, and mutate using the exact call from Task 1's report (for `messages.transform`,
-  push/unshift a `{role, content}` message per the observed shape instead of
-  `output.system.push`). Keep the dedup `injectedTracker` and the per-agent
-  `input.agentConfig.skills` override.
+- **Keep** the `'experimental.chat.system.transform'` hook and the `output.system.push(string)`
+  mutation — Task 1 confirmed it is live on 1.17.13 (#17100 does not apply). Do NOT swap
+  hooks. Keep the dedup `injectedTracker` and the per-agent `input.agentConfig.skills`
+  override.
 
 - [ ] **Step 4: Run the test to verify it passes**
 
