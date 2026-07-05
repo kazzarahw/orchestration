@@ -63,6 +63,26 @@ Permissions are a last-match-wins rule list of `{permission, action, pattern}` e
 tool-execution time. The design's deny-source/allow-docs gate (plan Task 5) is viable as
 specified — no fallback needed.
 
+## 2b. Gate limitation — bash-enabled agents bypass via shell redirect
+
+Verified during Task 5 on `orchestrate` (which has `bash: allow`). The model tried in order:
+`Edit gate-probe.ts` → **denied** (edit `**`), `Write gate-probe.ts` → **denied**, then
+`echo 'export const y = 2' > gate-probe.ts` via **bash** → **allowed**, file created.
+
+**Conclusion:** the `edit`/`write` gate is airtight, but permission maps gate *tools*, not
+shell redirects. Agents with `bash: allow` (`orchestrate`, `critique`, `review`, `dogfood`)
+can write source via `>`/`tee`/`sed -i`/heredoc. Agents with `bash: deny` (`design`, `plan`,
+`research`) are fully airtight.
+
+- This only triggered under **explicit, repeated adversarial pushing** (told to create the
+  file, then denied twice). The natural *drift* path — a model reaching for the Edit tool —
+  is blocked and the deny reason redirects it toward Build. That is the real threat model.
+- Denying shell redirects via `bash` permission globs is not viable (too many write paths;
+  would break legitimate `>` usage for tests/`.docs`/`.opencode`). So bash-write is left to
+  **Tier S (structural review)** + **Tier L (linguistic Iron Law)**, consistent with the
+  design's tiering. Open hardening option: set `bash: deny` on pure-review agents
+  (`critique`) that never need to execute — deferred as a decision.
+
 ## 3. `default_agent` — confirmed
 
 `"default_agent": "orchestrate"` in `opencode.jsonc`:

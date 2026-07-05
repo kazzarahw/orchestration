@@ -13,8 +13,20 @@ permission:
     "research": allow
   read: allow
   grep: allow
-  edit: allow
-  write: allow
+  edit:
+    "**": deny
+    "**/*.md": allow
+    ".docs/**": allow
+    "*.json": allow
+    "*.jsonc": allow
+    ".opencode/**": allow
+  write:
+    "**": deny
+    "**/*.md": allow
+    ".docs/**": allow
+    "*.json": allow
+    "*.jsonc": allow
+    ".opencode/**": allow
   bash: deny
   todowrite: allow
   question: allow

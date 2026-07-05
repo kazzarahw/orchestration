@@ -10,8 +10,20 @@ color: "#27AE60"
 permission:
   read: allow
   grep: allow
-  edit: allow
-  write: allow
+  edit:
+    "**": deny
+    "**/*.md": allow
+    ".docs/**": allow
+    "*.json": allow
+    "*.jsonc": allow
+    ".opencode/**": allow
+  write:
+    "**": deny
+    "**/*.md": allow
+    ".docs/**": allow
+    "*.json": allow
+    "*.jsonc": allow
+    ".opencode/**": allow
   bash: deny
   task: deny
   skill: allow
