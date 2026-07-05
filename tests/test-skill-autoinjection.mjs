@@ -9,8 +9,9 @@
  * 5. Deduplication (no double injection)
  * 6. Missing skill file → console.warn, continues
  * 7. SUBAGENT-STOP blocks stripped
- * 8. Tool mapping appended
+ * 8. Tool mapping removed (OpenCode-only build)
  * 9. Per-agent frontmatter override
+ * 14. Default skill list falls back to and injects workflow-gateway
  */
 
 import path from 'path';
@@ -155,9 +156,9 @@ try {
     assert(firstInjection.includes('## Test Skill One'),
       'First injection has skill body');
 
-    // Check tool mapping present
-    assert(firstInjection.includes('Tool Mapping for OpenCode'),
-      'Injection includes tool mapping');
+    // Tool mapping must NOT be present (dropped for OpenCode-only build)
+    assert(!firstInjection.includes('Tool Mapping for OpenCode'),
+      'Injection must NOT include tool mapping (dropped for OpenCode-only)');
   }
 
   // ── Test 5: Deduplication ───────────────────────────────
@@ -223,7 +224,7 @@ try {
       'Skill body preserved after stripping');
   }
 
-  // ── Test 8: Tool mapping included ────────────────────────
+  // ── Test 8: Tool mapping removed (OpenCode-only build) ───
 
   {
     const config = {
@@ -236,10 +237,10 @@ try {
     await p6['experimental.chat.system.transform']({ agent: 'mapping-test' }, output);
 
     const content = output.system[0] || '';
-    assert(content.includes('todowrite'), 'Tool mapping includes todowrite');
-    assert(content.includes('`bash`'),
-      'Tool mapping includes bash reference');
-    assert(content.includes('`skill`'), 'Tool mapping includes skill tool');
+    assert(!content.includes('Tool Mapping for OpenCode'),
+      'TOOL_MAPPING header must not be injected');
+    assert(!content.includes('substitute OpenCode equivalents'),
+      'TOOL_MAPPING guidance must not be injected');
     assert(content.includes('</AUTO_INJECTED_SKILL>'),
       'Injection has closing wrapper tag');
   }
@@ -305,16 +306,16 @@ try {
       'Empty skills list injects nothing');
   }
 
-  // ── Test 11: Empty config = no injection ────────────────
+  // ── Test 11: Explicit empty skill list = no injection ───
 
   {
-    const config = { skills: { paths: [] } };
+    const config = { 'skill-autoinjection': [], skills: { paths: [] } };
     const p9 = await SkillAutoinjectionPlugin({ client: {}, directory: testDir }, { skillsDir });
     await p9.config(config);
     const output = { system: [] };
     await p9['experimental.chat.system.transform']({}, output);
     assert(output.system.length === 0,
-      'Empty config injects nothing');
+      'Explicit empty skill list injects nothing');
   }
 
   // ── Test 12: Folded block scalar (>-) description ──────
@@ -370,6 +371,32 @@ try {
       'HTML escaping: unescaped quotes do not break attribute');
     assert(content.includes('</AUTO_INJECTED_SKILL>'),
       'HTML escaping: closing wrapper tag present');
+  }
+
+  // ── Test 14: Default skill list falls back to workflow-gateway ──
+
+  {
+    // Create mock skills matching the hardcoded DEFAULT_SKILLS list
+    createSkill('workflow-gateway', 'gateway', '## Gateway body');
+    createSkill('optimize-tokens', 'tokens', '## Tokens body');
+    createSkill('use-todo', 'todo', '## Todo body');
+
+    // No 'skill-autoinjection' key → plugin must fall back to DEFAULT_SKILLS
+    const config = { skills: { paths: [] } };
+    const p12 = await SkillAutoinjectionPlugin({ client: {}, directory: testDir }, { skillsDir });
+    await p12.config(config);
+    const output = { system: [] };
+    await p12['experimental.chat.system.transform']({ agent: 'default-test' }, output);
+
+    const all = output.system.join('\n');
+    const cnt = output.system.filter(s => s.includes('<AUTO_INJECTED_SKILL')).length;
+    assert(cnt === 3, `Default list injects 3 skills (got ${cnt})`);
+    assert(all.includes('name="workflow-gateway"'),
+      'Default list injects workflow-gateway');
+    assert(all.includes('name="optimize-tokens"'),
+      'Default list injects optimize-tokens');
+    assert(all.includes('name="use-todo"'),
+      'Default list injects use-todo');
   }
 
 } finally {

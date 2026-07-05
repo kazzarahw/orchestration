@@ -23,19 +23,6 @@ const FRONTMATTER_RE = /^---\n([\s\S]*?)\n---\n([\s\S]*)$/;
 // Regex to strip <SUBAGENT-STOP>...</SUBAGENT-STOP> blocks
 const SUBAGENT_STOP_RE = /<SUBAGENT-STOP>[\s\S]*?<\/SUBAGENT-STOP>\n*/g;
 
-const TOOL_MAPPING = `**Tool Mapping for OpenCode:**
-When skills request actions, substitute OpenCode equivalents:
-- Create or update todos → \`todowrite\`
-- \`Subagent (general-purpose):\` → \`task\` with \`subagent_type: "general"\`
-- Invoke a skill → OpenCode's native \`skill\` tool
-- Read files → \`read\`
-- Create, edit, or delete files → \`apply_patch\`
-- Run shell commands → \`bash\`
-- Search files → \`grep\`, \`glob\`
-- Fetch a URL → \`webfetch\`
-
-Use OpenCode's native \`skill\` tool to list and load skills.`;
-
 /**
  * Parse a skill file, extracting frontmatter and body.
  * Returns { name, description, body } or null on failure.
@@ -128,8 +115,6 @@ function buildInjectionContent(skillName, skillsDir, cache) {
 
   const content = `<AUTO_INJECTED_SKILL name="${escapeHtml(parsed.name)}" description="${escapeHtml(parsed.description)}">
 ${parsed.body}
-
-${TOOL_MAPPING}
 </AUTO_INJECTED_SKILL>`;
 
   cache.set(cacheKey, content);
@@ -147,7 +132,7 @@ export const SkillAutoinjectionPlugin = async ({ client, directory }, options = 
   // Override via SKILL_AUTOINJECTION env var (comma-separated names).
   const DEFAULT_SKILLS = (process.env.SKILL_AUTOINJECTION
     ? process.env.SKILL_AUTOINJECTION.split(',').map(s => s.trim()).filter(Boolean)
-    : ['optimize-tokens', 'use-todo']);
+    : ['workflow-gateway', 'optimize-tokens', 'use-todo']);
 
   // Per-instance caches
   const injectionCache = new Map();
