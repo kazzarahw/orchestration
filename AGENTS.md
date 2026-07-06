@@ -80,9 +80,15 @@ Skills use `dot` code blocks for flowcharts. Install graphviz (`apt install grap
 dot -Tsvg -o diagram.svg diagram.dot
 ```
 
-## Platform Targets
+## Platform Target
 
-This repo supports multiple runtimes. On OpenCode, skills are invoked with the `Skill` tool and "dispatch a subagent" maps to the `Task` tool with the `subagent_type` parameter.
+This repo targets **OpenCode** (single platform, as of the 2026-07 enforcement overhaul). Skills
+are invoked with OpenCode's `skill` tool; "dispatch a subagent" maps to the `task` tool with a
+`subagent_type`. Enforcement relies on OpenCode-specific mechanisms — the `skill-autoinjection`
+plugin injects the always-on gateway via `experimental.chat.messages.transform` (a `user` message —
+`system.transform` content is read but not obeyed), native `permission` maps gate source edits to
+the `build` agent, and `default_agent` launches into `orchestrate`. Skill *bodies* stay
+runtime-neutral in phrasing where it costs nothing, but portability is no longer a goal.
 
 ## Key Skill Dependency Chain
 
