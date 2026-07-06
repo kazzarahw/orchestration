@@ -66,6 +66,18 @@ Work from: `[directory]`
 
 While iterating, run the focused test for what you're changing; run the full suite once before committing, not after every edit.
 
+## Executable Contracts (REQUIRED every task)
+
+Invoke the `design-by-contract` skill and apply it to this task:
+- If the task brief includes acceptance examples (specification-by-example), seed your test file
+  from them first — they are your first RED tests.
+- Add ≥1 **property test** (a loop/table over many inputs asserting a predicate true for all) and
+  executable **contract guards** (preconditions always; pre/postconditions + invariants at
+  public/risky boundaries), proportionate to the code's exposure.
+- Then run the TDD cycle: RED → minimal code → GREEN → refactor.
+
+Never ship only example-based tests. A `typeof`-typed parameter is not a runtime guard at a public boundary.
+
 ## Code Organization
 
 You reason best about code you can hold in context at once, and your edits are more reliable when files are focused. Keep this in mind:
@@ -128,6 +140,8 @@ Write your full report to `[REPORT_FILE]`:
 - **TDD Evidence:**
   - RED: command run, relevant failing output before implementation, and why the failure was expected
   - GREEN: command run and relevant passing output after implementation
+- **Contract/property evidence:** the precondition guard(s) added, and the property test(s) with the
+  rule each asserts (or, for pure glue, the integration assertion + why no property applies)
 - Files changed
 - Self-review findings (if any)
 - Any issues or concerns
