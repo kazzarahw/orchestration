@@ -1,0 +1,15 @@
+{
+  "name": "orchestration",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Personal AI orchestration framework — OpenCode skills, agents, and plugins",
+  "type": "module",
+  "scripts": {
+    "test": "bun tests/test-skill-autoinjection.mjs",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@opencode-ai/plugin": "^1.17.13",
+    "@types/node": "^26.1.0"
+  }
+}

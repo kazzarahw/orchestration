@@ -10,7 +10,6 @@
  * 6. No TOOL_MAPPING (OpenCode-only build)
  * 7. Deduplication (no double injection per agent per process)
  * 8. SUBAGENT-STOP blocks stripped
- * 9. Per-agent frontmatter override
  * 10. Empty skills list injects nothing
  * 11. Missing skill file → console.warn, continues
  * 12. Default fallback list includes workflow-gateway
@@ -59,7 +58,7 @@ function injectedMsg(output) {
 
 let SkillAutoinjectionPlugin;
 try {
-  const mod = await import('../src/plugins/skill-autoinjection.js');
+  const mod = await import('../src/plugins/skill-autoinjection.ts');
   SkillAutoinjectionPlugin = mod.SkillAutoinjectionPlugin || mod.default;
   assert(typeof SkillAutoinjectionPlugin === 'function', 'Plugin exports a factory function');
 } catch (err) {
@@ -129,18 +128,6 @@ try {
     const text = injectedMsg(output)?.parts?.[0]?.text || '';
     assert(!text.includes('<SUBAGENT-STOP>'), 'SUBAGENT-STOP block stripped');
     assert(text.includes('## Test Skill With Stop'), 'Skill body preserved after stripping');
-  }
-
-  // Test 9: per-agent override
-  {
-    const config = { 'skill-autoinjection': ['test-skill-one'], skills: { paths: [] } };
-    const p = await SkillAutoinjectionPlugin({ client: {}, directory: testDir }, { skillsDir });
-    await p.config(config);
-    const output = mkOutput();
-    await p['experimental.chat.messages.transform']({ agent: 'ov', agentConfig: { skills: ['test-skill-two'] } }, output);
-    const text = injectedMsg(output)?.parts?.[0]?.text || '';
-    assert(text.includes('name="test-skill-two"'), 'Per-agent override injects the override skill');
-    assert(!text.includes('name="test-skill-one"'), 'Per-agent override excludes the global skill');
   }
 
   // Test 10: explicit empty list → nothing

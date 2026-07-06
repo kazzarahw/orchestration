@@ -12,3 +12,6 @@
 .env
 .env.*
 *.log
+
+# Bun / node
+node_modules/
