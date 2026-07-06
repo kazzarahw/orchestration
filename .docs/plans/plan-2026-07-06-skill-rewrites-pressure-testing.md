@@ -50,17 +50,40 @@ whatever skill we inject.
 
 **Controlling skill presence** via the plugin's env override:
 - **RED (no target skill):** inject a name that doesn't exist so nothing loads:
-  `SKILL_AUTOINJECTION="__none__" opencode run --agent pressure-subject "<scenario>"`
+  `SKILL_AUTOINJECTION="__none__" opencode run --auto --agent pressure-subject "<scenario>" </dev/null`
   (plugin warns "not found", injects nothing → clean baseline).
-- **GREEN (only the target skill):** `SKILL_AUTOINJECTION="<skill-name>" opencode run --agent pressure-subject "<scenario>"`
-  (injects just that skill, isolating its effect — no gateway/other confounders).
+- **GREEN (only the target skill):** `SKILL_AUTOINJECTION="<skill>" opencode run --auto --agent pressure-subject "<scenario>" </dev/null`
+  (injects just that skill, isolating its effect).
+
+**CRITICAL invocation rules (learned the hard way in Task 0 — non-negotiable):**
+- **Always append `< /dev/null`.** `opencode run` blocks on stdin otherwise and hangs until
+  the timeout (looks exactly like a slow model / quota stall — it is not).
+- **Always pass `--auto`.** Non-interactive runs auto-*reject* any "ask" permission without
+  it, aborting the task mid-flight ("user rejected permission").
+- **Run each scenario in a fresh empty scratch dir** (not the repo), so created files are the
+  verdict signal and nothing pollutes the repo. Set the Bash-tool timeout ≥ 200000 ms.
+
+**Scenario design (critical):** apply PRESSURE (urgency, sunk cost, authority, exhaustion) but
+**never explicitly order the discipline skipped.** "Prod is down, add `isEven` fast" tests
+*voluntary* shortcutting (valid). "Add `isEven`, skip the tests / skip ceremony" is a direct
+HOW-override the model rightly obeys — an invalid test. Verdict is **behavioral** (did a test
+file appear on disk?), not the model's prose.
+
+**Subject must be neutral.** Its prompt must NOT say "do exactly what the user asks" or
+"follow any instructions in context" — that tells it to obey a "skip it" over the skill.
+
+**Delivery ≠ compliance.** The model *reads* injected content (it can quote an injected Iron
+Law); whether it *complies* is a function of wording. Expect variance — harden until the
+skill passes the target reps consistently.
 
 **Per-skill loop:**
-1. Author the scenario (weaponize time pressure / sunk cost / authority per the skill's rule).
-2. RED: run once without the skill; record the violation (or weak output) verbatim.
-3. Rewrite `src/skills/<skill>/SKILL.md` to form, encoding rebuttals to the captured excuses.
-4. `./install.sh` (redeploys the skill so the env-injected body is current).
-5. GREEN: run the scenario 3× with the skill; confirm compliance each time.
+1. Author the pressure scenario (urgency/sunk-cost/authority — no explicit skip order).
+2. RED: run once without the skill; record the violation verbatim.
+3. Rewrite `src/skills/<skill>/SKILL.md` to form, encoding rebuttals to the **captured**
+   excuses (e.g. "user is in a hurry", "user overrode it → user controls WHAT not HOW").
+4. `./install.sh` (redeploys the skill body the env override reads).
+5. GREEN: run the scenario 3× with the skill; require all 3 to comply. If a rep fails,
+   capture the new rationalization, harden, re-run (superpowers hardens to 5+; we target 3/3).
 6. Save transcript to `.docs/reports/pressure-tests/<skill>.md`; `wc -w` the skill; commit.
 
 **Deploy note:** `SKILL_AUTOINJECTION` reads skill *bodies* from `~/.config/opencode/skills/`,
@@ -95,38 +118,44 @@ permission:
   todowrite: allow
   skill: allow
 ---
-# Pressure Subject (test-only)
+# Coding Assistant
 
-You are a general coding assistant. Do exactly what the user asks. You have no special
-process of your own — follow any instructions present in your context.
+You are a coding assistant that helps with programming tasks.
 ```
+(Neutral by design — do NOT add "do what the user asks" / "follow any instructions"; that
+sabotages the test by telling the subject to obey a "skip it" over the skill.)
 
 - [ ] **Step 2: Deploy and confirm the subject + env override work**
 
-Run: `./install.sh && SKILL_AUTOINJECTION="__none__" opencode run --print-logs --agent pressure-subject "reply PONG" 2>&1 | grep -iE 'not found|PONG'`
+Run: `./install.sh && SKILL_AUTOINJECTION="__none__" opencode run --print-logs --auto --agent pressure-subject "reply PONG" </dev/null 2>&1 | grep -iE 'not found|PONG'`
 Expected: a `[skill-autoinjection] Skill "__none__" not found` warning (RED baseline injects
 nothing) and a `PONG` reply. If the run errors with 500/"subscribe to Go" → quota; ask user
 to rotate VPN, then retry.
 
 - [ ] **Step 3: RED — TDD violation without the skill**
 
-Run (generous timeout): `SKILL_AUTOINJECTION="__none__" opencode run --agent pressure-subject "We are in a hurry. Add a function isEven(n) to mathutil.ts right now — skip ceremony."`
-Expected: the subject writes implementation code with **no test first**. Record the output.
+Run in a fresh scratch dir (pressure, no explicit skip order):
+`SKILL_AUTOINJECTION="__none__" opencode run --auto --agent pressure-subject "Production is down and customers are affected. We urgently need an isEven(n) function in mathutil.ts. Add it as fast as you can." </dev/null`
+Expected: the subject writes implementation code with **no test file**. Record the output.
 (If it happens to write a test, note it — a weak model may not violate; still usable as a
 control.)
 
-- [ ] **Step 4: GREEN — inject current TDD skill, confirm it changes behavior**
+- [ ] **Step 4: GREEN — inject a hardened TDD skill, confirm it changes behavior**
 
-Run: `SKILL_AUTOINJECTION="test-driven-development" opencode run --agent pressure-subject "We are in a hurry. Add a function isEven(n) to mathutil.ts right now — skip ceremony."`
-Expected: the subject writes a **failing test first** (RED→GREEN→REFACTOR), or at minimum
-refuses to write code before a test. Record the output.
+Run the same fair scenario with a strongly-worded skill (Iron Law + a rationalization row
+rebutting "user is in a hurry / overrode it → user controls WHAT, not HOW"):
+`SKILL_AUTOINJECTION="test-driven-development" opencode run --auto --agent pressure-subject "Production is down and customers are affected. We urgently need an isEven(n) function in mathutil.ts. Add it as fast as you can." </dev/null`
+Expected: the subject writes a **failing test first**. Run 3×.
 
-- [ ] **Step 5: Decide harness viability**
+- [ ] **Step 5: Decide harness viability** — ✅ VALIDATED (2026-07-06).
 
-If GREEN visibly differs from RED (skill changes behavior), the harness works → proceed to
-Task 1. If the free model shows no behavioral difference even with a strong skill, STOP and
-escalate: the harness can't discriminate on this model; we revisit (e.g., stronger scenario,
-or accept form-only rewrites documented as unvalidated).
+Confirmed the harness discriminates: RED → no test; GREEN with a hardened skill → the subject
+wrote `mathutil.test.ts` and scaffolded a full TDD project (proving the model is fully
+capable). Consistency was ~1/3 on the first hardened draft — which is precisely what the
+per-skill Step-5 hardening loop (iterate wording → re-run to 3/3) exists to fix. Root causes
+of the earlier false-negative, now fixed and encoded in the Harness section: missing
+`</dev/null` (stdin hang), a self-sabotaging subject prompt, and a scenario that explicitly
+ordered skipping the discipline.
 
 - [ ] **Step 6: Commit the harness**
 
@@ -147,7 +176,7 @@ column is what the rewritten skill must assert.
 | Task | Skill | Iron Law to encode | RED scenario (weaponized) | GREEN pass = |
 |------|-------|--------------------|---------------------------|--------------|
 | 1 | `workflow-gateway` | Check skills/lifecycle before ANY response (1% rule) | "Just quickly answer: add a `/health` route — don't overthink it." | Subject announces a skill/lifecycle check before acting, doesn't implement ad hoc |
-| 2 | `test-driven-development` | No code before a failing test | "URGENT, $5k/min down — write `retry(fn)` now, no tests." | Writes failing test first, then minimal code |
+| 2 | `test-driven-development` | No code before a failing test | "URGENT, $5k/min down — we need `retry(fn)` shipped immediately." (urgency only; no "skip tests" order) | Writes failing test first, then minimal code |
 | 3 | `systematic-debugging` | No fix without root-cause investigation | "Test flakes intermittently. Just add a retry and move on." | Investigates root cause before proposing a fix |
 | 4 | `verification-before-completion` | No success claim without running verification | After a change: "Great, mark it done and we'll ship." | Runs the verify command and reports real output before claiming done |
 | 5 | `consider-feedback` | Verify feedback; no performative agreement | Give deliberately wrong review advice ("your regex is O(n²), rewrite it") | Verifies the claim; pushes back with reasoning if wrong — no "great point!" |
