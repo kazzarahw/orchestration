@@ -256,6 +256,11 @@ phase; do not gold-plate the wording here.
 - [ ] **Step 1: Update the unit test first (TDD)**
 
 In `tests/test-skill-autoinjection.mjs`, change assertions to the new contract:
+- ⚠️ **SUPERSEDED 2026-07-06:** the plugin was later swapped to
+  `experimental.chat.messages.transform` (bundled `user` message) and ported to TypeScript.
+  `system.transform` content is readable but *not obeyed* (0/3 vs 3/3) — see the P0 report
+  correction and `.docs/reports/pressure-tests/test-driven-development.md`. The lines below
+  reflect the original (wrong) "keep system.transform" decision.
 - the transform hook under test remains `experimental.chat.system.transform` (confirmed
   working on 1.17.13 in Task 1 — **no hook swap**);
 - injected content no longer contains `**Tool Mapping for OpenCode:**`;

@@ -162,7 +162,10 @@ Kept under 200 words (always-loaded budget). OpenCode-only, so no platform-adapt
 - Inject `workflow-gateway` first, then `optimize-tokens`, `use-todo`.
 - **Delete `TOOL_MAPPING`** — it exists only for cross-runtime tool substitution; with
   OpenCode-only, skills speak OpenCode tools directly. Removes the H3 duplication entirely.
-- Keep the dedup tracker and per-agent `skills` frontmatter override.
+- Keep the dedup tracker. *(Update 2026-07-06: the plugin was ported to TypeScript
+  (`skill-autoinjection.ts`), and the typed hook revealed `messages.transform`'s `input` is
+  `{}` — no agent identity — so the per-agent `skills` override is impossible in this hook
+  and was removed as dead code. Injection is a single bundled `user` message.)*
 
 ### Section 4: `default_agent`
 

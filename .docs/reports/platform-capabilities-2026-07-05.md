@@ -14,7 +14,23 @@ against the free `deepseek-v4-flash-free` model. Plan reference:
 | `EDIT_GLOB_ENFORCED` | **yes** — glob `permission.edit` denies at tool-execution time | Proven |
 | `DEFAULT_AGENT_WORKS` | **yes** | Proven |
 
-## 1. Injection hook — `system.transform` is LIVE on 1.17.13
+## ⚠️ CORRECTION (2026-07-06) — §1's conclusion was wrong
+
+§1 below concluded "keep `system.transform`, no hook swap needed" because a marker pushed
+via `system.transform` was **echoed** by the model. That proved the content is *readable* —
+but **readable ≠ obeyed.** A later behavioral test (`.docs/reports/pressure-tests/test-driven-development.md`)
+measured, on the same model with global rules removed:
+
+- skill via `system.transform`: **0/3** compliance (same as no guidance — read but ignored)
+- identical skill via `messages.transform` as a **`user` message**: **3/3**
+
+So the spec's original call (Section 3: swap to `messages.transform`) was correct, and the
+P0 decision to keep `system.transform` was the error — I conflated "reaches the model" with
+"changes behavior." The plugin now injects via `messages.transform` as a bundled `user`
+message (`df27c8d`, ported to TS in `9f4541c`). **Treat §1's "no hook swap" line as reversed.**
+The message-shape details in §1 remain accurate and were needed for the fix.
+
+## 1. Injection hook — `system.transform` is LIVE on 1.17.13 *(readable, not obeyed — see correction above)*
 
 A marker `PROBE_MARKER_SYSTEM_7F3A` pushed via `experimental.chat.system.transform`
 (`output.system.push(string)`) was **echoed back by the model**, proving the mutation
