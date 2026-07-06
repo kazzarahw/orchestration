@@ -100,6 +100,18 @@ can write source via `>`/`tee`/`sed -i`/heredoc. Agents with `bash: deny` (`desi
 - **Harmless noise:** the `gpt-5.4-nano … Missing API key` title-model error on stderr does
   not affect the main run.
 
+## Integration (P1 exit) — all green
+
+| Check | Method | Result |
+|-------|--------|--------|
+| Gateway injected every turn | `[SAI]` instrumentation: `config hook … globalSkillNames = ["workflow-gateway","optimize-tokens","use-todo"]`, `transform fired; length = 3` | ✅ PASS |
+| Source-edit gate (bash-deny agent) | `design` asked to create `int-probe.ts` + `.docs/int-probe.md` → source **not created**, docs **created** | ✅ PASS |
+| `default_agent` | no-`--agent` run logs `agent=orchestrate mode=primary` | ✅ PASS |
+
+Known limitation carried forward: bash-enabled agents can bypass the source gate via shell
+redirect (§2b) — covered by Tier S/L, with an optional `bash: deny` hardening for `critique`
+deferred as a decision.
+
 ## Plan adjustments arising from P0
 
 1. **Task 3:** do **not** swap the injection hook. Keep `system.transform`; only add
