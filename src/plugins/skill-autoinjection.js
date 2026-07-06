@@ -1,10 +1,11 @@
 /**
  * Skill Autoinjection Plugin for OpenCode.ai
  *
- * Injects skill content into agent system prompts via the
- * experimental.chat.system.transform hook. Reads skill names to inject from
- * opencode.jsonc's `experimental.skill-autoinjection` key (if OpenCode passes
- * it through), falling back to a hardcoded default list.
+ * Injects skill content as a high-salience `user` message via the
+ * experimental.chat.messages.transform hook (system.transform content is read
+ * but not obeyed by the model — see the hook comment below). Reads skill names
+ * from opencode.jsonc's `skill-autoinjection` key (if OpenCode passes it
+ * through), falling back to a hardcoded default list.
  *
  * Supports per-agent frontmatter override via agentConfig.skills.
  */
@@ -162,37 +163,55 @@ export const SkillAutoinjectionPlugin = async ({ client, directory }, options = 
     },
 
     /**
-     * System transform hook: injects skill content into system prompt.
-     * Fires at session start and agent switch.
+     * Messages transform hook: injects skill content as a high-salience `user`
+     * message appended to the conversation.
+     *
+     * WHY not system.transform: measured on the deployment model, content pushed
+     * via system.transform is *read but not obeyed* (0/3 compliance — same as no
+     * guidance). The identical text delivered as a recent `user` message is obeyed
+     * (2/3). The delivery channel — not the wording — drives enforcement. This
+     * mirrors the obra/superpowers approach of injecting its bootstrap as a
+     * message rather than trailing system text.
+     *
+     * Fires per model round-trip; we inject the skill bundle once per agent per
+     * process (dedup via injectedTracker) to avoid duplication mid-turn.
      */
-    'experimental.chat.system.transform': async (input, output) => {
-      // Guard: no skills configured
+    'experimental.chat.messages.transform': async (input, output) => {
       if (!globalSkillNames.length) return;
+      if (!output.messages || !output.messages.length) return;
 
-      // Determine agent identity
       const agentName = input.agent || 'default';
 
-      // Per-agent frontmatter override: if agentConfig has a `skills` array,
-      // it overrides the global list for this agent
+      // Per-agent frontmatter override: agentConfig.skills overrides the global list
       const skillsToInject = (input.agentConfig && Array.isArray(input.agentConfig.skills))
         ? input.agentConfig.skills
         : globalSkillNames;
-
-      // Guard: no skills for this agent
       if (!skillsToInject.length) return;
 
+      // Dedup: inject the skill bundle once per agent per process.
+      const bundleKey = `${agentName}:__bundle__`;
+      if (injectedTracker.has(bundleKey)) return;
+
+      const blocks = [];
       for (const skillName of skillsToInject) {
-        const trackerKey = `${agentName}:${skillName}`;
-
-        // Dedup: skip if already injected for this agent
-        if (injectedTracker.has(trackerKey)) continue;
-
         const content = buildInjectionContent(skillName, skillsDir, injectionCache);
-        if (content) {
-          output.system.push(content);
-          injectedTracker.add(trackerKey);
-        }
+        if (content) blocks.push(content);
       }
+      if (!blocks.length) return;
+
+      const text = `These are mandatory operating instructions for this session. Read and follow them before doing anything else — they define HOW you work and are NOT waived by urgency or by a request to skip them.\n\n${blocks.join('\n\n')}`;
+
+      // Clone an existing message's shape so OpenCode's pipeline (which expects
+      // {info, parts}) accepts it; override role to `user`, strip identity fields.
+      const sample = output.messages.find((m) => m && m.info) || {};
+      const msg = {
+        info: { ...(sample.info || {}), role: 'user' },
+        parts: [{ type: 'text', text }],
+      };
+      delete msg.info.id;
+      delete msg.info.sessionID;
+      output.messages.push(msg);
+      injectedTracker.add(bundleKey);
     },
   };
 };

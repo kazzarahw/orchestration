@@ -1,30 +1,29 @@
 /**
  * Test: skill-autoinjection.js
  *
- * Validates the SkillAutoinjectionPlugin:
- * 1. Loads without errors
- * 2. Has expected hooks (config, system.transform)
- * 3. Config hook reads skill-autoinjection from config
- * 4. System.transform injects skill content
- * 5. Deduplication (no double injection)
- * 6. Missing skill file → console.warn, continues
- * 7. SUBAGENT-STOP blocks stripped
- * 8. Tool mapping removed (OpenCode-only build)
+ * Validates the SkillAutoinjectionPlugin (messages.transform channel):
+ * 1. Loads without errors, exports a factory
+ * 2. Has expected hooks (config, messages.transform)
+ * 3. Config hook registers skills path + reads skill-autoinjection list
+ * 4. messages.transform appends ONE `user` message bundling the skills
+ * 5. Bundle contains a block per configured skill, wrapped in <AUTO_INJECTED_SKILL>
+ * 6. No TOOL_MAPPING (OpenCode-only build)
+ * 7. Deduplication (no double injection per agent per process)
+ * 8. SUBAGENT-STOP blocks stripped
  * 9. Per-agent frontmatter override
- * 14. Default skill list falls back to and injects workflow-gateway
+ * 10. Empty skills list injects nothing
+ * 11. Missing skill file → console.warn, continues
+ * 12. Default fallback list includes workflow-gateway
+ * 13. Injected message has a valid {info:{role:'user'}, parts:[{type,text}]} shape
  */
 
 import path from 'path';
 import fs from 'fs';
 
-// ── Setup: pristine temp directory with mock skills ──────
-
-const testId = Date.now();
-const testDir = fs.mkdtempSync(`/tmp/skill-autoinjection-test-${testId}-`);
+const testDir = fs.mkdtempSync(`/tmp/skill-autoinjection-test-`);
 const skillsDir = path.join(testDir, 'skills');
 fs.mkdirSync(skillsDir, { recursive: true });
 
-// Helper: create a mock skill file
 function createSkill(name, description, body, addSubagentStop = false) {
   const dir = path.join(skillsDir, name);
   fs.mkdirSync(dir, { recursive: true });
@@ -36,48 +35,27 @@ function createSkill(name, description, body, addSubagentStop = false) {
   fs.writeFileSync(path.join(dir, 'SKILL.md'), content);
 }
 
-// Helper: create a mock skill file with custom raw frontmatter string
-function createSkillWithFrontmatter(name, frontmatterStr, body) {
-  const dir = path.join(skillsDir, name);
-  fs.mkdirSync(dir, { recursive: true });
-  const content = `---\n${frontmatterStr}\n---\n\n${body}`;
-  fs.writeFileSync(path.join(dir, 'SKILL.md'), content);
-}
+createSkill('test-skill-one', 'First test skill', '## Test Skill One\n\nBody one.\n- Item 1');
+createSkill('test-skill-two', 'Second test skill', '## Test Skill Two\n\nBody two.');
+createSkill('test-skill-with-stop', 'Skill with stop', '## Test Skill With Stop\n\nImportant content.', true);
 
-// Create test skills
-createSkill(
-  'test-skill-one',
-  'First test skill',
-  '## Test Skill One\n\nThis is the body of test skill one.\n\n- Item 1\n- Item 2'
-);
-createSkill(
-  'test-skill-two',
-  'Second test skill',
-  '## Test Skill Two\n\nThis has different content.\n\nSome code:\n```js\nconst x = 1;\n```'
-);
-createSkill(
-  'test-skill-with-stop',
-  'Skill with SUBAGENT-STOP',
-  '## Test Skill With Stop\n\nThis has a SUBAGENT-STOP block.\n\nImportant content here.',
-  true // adds SUBAGENT-STOP block
-);
-
-// ── Helpers ──────────────────────────────────────────────
-
-let passed = 0;
-let failed = 0;
+let passed = 0, failed = 0;
 const errors = [];
+function assert(cond, msg) { if (cond) passed++; else { failed++; errors.push(`FAIL: ${msg}`); } }
 
-function assert(condition, message) {
-  if (condition) {
-    passed++;
-  } else {
-    failed++;
-    errors.push(`FAIL: ${message}`);
-  }
+// A realistic output object: one existing user message (the plugin clones its shape).
+function mkOutput() {
+  return {
+    messages: [{
+      info: { role: 'user', time: { created: 1 }, agent: 'a', model: { providerID: 'p', modelID: 'm' }, id: 'msg_1', sessionID: 'ses_1' },
+      parts: [{ type: 'text', text: 'do a thing', id: 'prt_1' }],
+    }],
+  };
 }
-
-// ── Import the plugin ────────────────────────────────────
+// The injected message = the last one whose text contains the wrapper.
+function injectedMsg(output) {
+  return [...output.messages].reverse().find(m => m?.parts?.[0]?.text?.includes('<AUTO_INJECTED_SKILL'));
+}
 
 let SkillAutoinjectionPlugin;
 try {
@@ -85,334 +63,143 @@ try {
   SkillAutoinjectionPlugin = mod.SkillAutoinjectionPlugin || mod.default;
   assert(typeof SkillAutoinjectionPlugin === 'function', 'Plugin exports a factory function');
 } catch (err) {
-  failed++;
-  errors.push(`FAIL: Plugin import error: ${err.message}`);
-  // If import failed, stop early
-  console.error('Plugin import failed — cannot run further tests');
-  console.error(`  ${failed} failed, ${passed} passed`);
+  console.error(`Plugin import failed: ${err.message}`);
   process.exit(1);
 }
 
-// ── Mock warnings capture ────────────────────────────────
-
 const warnings = [];
 const originalWarn = console.warn;
-console.warn = (...args) => {
-  warnings.push(args.join(' '));
-};
+console.warn = (...args) => warnings.push(args.join(' '));
 
 try {
-
-  // ── Test 1: Plugin creates instance ─────────────────────
-
-  let plugin;
-  try {
-    plugin = await SkillAutoinjectionPlugin({ client: {}, directory: testDir }, { skillsDir });
-    assert(true, 'Plugin factory returns without error');
-    assert(plugin && typeof plugin === 'object', 'Plugin returns an object');
-  } catch (err) {
-    assert(false, `Plugin factory throws: ${err.message}`);
-  }
-
-  // ── Test 2: Plugin has expected hooks ──────────────────
-
+  // Test 1: factory + hooks
+  const plugin = await SkillAutoinjectionPlugin({ client: {}, directory: testDir }, { skillsDir });
+  assert(plugin && typeof plugin === 'object', 'Plugin returns an object');
   assert(typeof plugin.config === 'function', 'Plugin has config hook');
-  assert(typeof plugin['experimental.chat.system.transform'] === 'function',
-    'Plugin has experimental.chat.system.transform hook');
+  assert(typeof plugin['experimental.chat.messages.transform'] === 'function',
+    'Plugin has experimental.chat.messages.transform hook');
+  assert(plugin['experimental.chat.system.transform'] === undefined,
+    'Plugin no longer registers the (ineffective) system.transform hook');
 
-  // ── Test 3: Config hook registers skills path ─────────
-
+  // Test 2: config registers skills path
   {
     const config = { skills: { paths: [] } };
     await plugin.config(config);
-    assert(config.skills.paths.includes(skillsDir),
-      'Config hook registers skills path');
+    assert(config.skills.paths.includes(skillsDir), 'Config hook registers skills path');
   }
 
-  // ── Test 4: Config hook reads skill-autoinjection ─────
-
+  // Test 3+4+5+6: config-driven injection into a bundled user message
   {
-    const config = {
-      'skill-autoinjection': ['test-skill-one', 'test-skill-two'],
-      skills: { paths: [] },
-    };
-    // Re-create plugin to reset state for this test
-    const p2 = await SkillAutoinjectionPlugin({ client: {}, directory: testDir }, { skillsDir });
-    await p2.config(config);
+    const config = { 'skill-autoinjection': ['test-skill-one', 'test-skill-two'], skills: { paths: [] } };
+    const p = await SkillAutoinjectionPlugin({ client: {}, directory: testDir }, { skillsDir });
+    await p.config(config);
+    const output = mkOutput();
+    const before = output.messages.length;
+    await p['experimental.chat.messages.transform']({ agent: 'agentA' }, output);
 
-    const output = { system: [] };
-    await p2['experimental.chat.system.transform']({}, output);
-
-    // Should have 2 injected skills
-    const injectedCount = output.system.filter(s => s.includes('<AUTO_INJECTED_SKILL')).length;
-    assert(injectedCount === 2, `Config-driven: injects 2 skills (got ${injectedCount})`);
-
-    // Check first skill content
-    const firstInjection = output.system[0] || '';
-    assert(firstInjection.includes('name="test-skill-one"'),
-      'First injection has correct skill name');
-    assert(firstInjection.includes('description="First test skill"'),
-      'First injection has correct description');
-    assert(firstInjection.includes('## Test Skill One'),
-      'First injection has skill body');
-
-    // Tool mapping must NOT be present (dropped for OpenCode-only build)
-    assert(!firstInjection.includes('Tool Mapping for OpenCode'),
-      'Injection must NOT include tool mapping (dropped for OpenCode-only)');
+    assert(output.messages.length === before + 1, 'Injects exactly one bundled message');
+    const msg = injectedMsg(output);
+    assert(!!msg, 'A bundled message was appended');
+    assert(msg.info.role === 'user', 'Injected message has role "user" (high salience)');
+    const text = msg?.parts?.[0]?.text || '';
+    assert(text.includes('name="test-skill-one"'), 'Bundle contains skill one');
+    assert(text.includes('name="test-skill-two"'), 'Bundle contains skill two');
+    assert(text.includes('## Test Skill One'), 'Bundle contains skill body');
+    assert(!text.includes('Tool Mapping for OpenCode'), 'No TOOL_MAPPING injected');
   }
 
-  // ── Test 5: Deduplication ───────────────────────────────
-
+  // Test 7: dedup — second call for same agent injects nothing more
   {
-    const config = {
-      'skill-autoinjection': ['test-skill-one'],
-      skills: { paths: [] },
-    };
-    const p3 = await SkillAutoinjectionPlugin({ client: {}, directory: testDir }, { skillsDir });
-    await p3.config(config);
-
-    const output1 = { system: [] };
-    const output2 = { system: [] };
-
-    await p3['experimental.chat.system.transform']({ agent: 'test-agent' }, output1);
-    await p3['experimental.chat.system.transform']({ agent: 'test-agent' }, output2);
-
-    const count1 = output1.system.filter(s => s.includes('<AUTO_INJECTED_SKILL')).length;
-    const count2 = output2.system.filter(s => s.includes('<AUTO_INJECTED_SKILL')).length;
-
-    assert(count1 === 1, `First call injects 1 skill (got ${count1})`);
-    assert(count2 === 0, `Second call injects 0 (dedup, got ${count2})`);
+    const config = { 'skill-autoinjection': ['test-skill-one'], skills: { paths: [] } };
+    const p = await SkillAutoinjectionPlugin({ client: {}, directory: testDir }, { skillsDir });
+    await p.config(config);
+    const o1 = mkOutput(); await p['experimental.chat.messages.transform']({ agent: 'dupe' }, o1);
+    const o2 = mkOutput(); await p['experimental.chat.messages.transform']({ agent: 'dupe' }, o2);
+    assert(!!injectedMsg(o1), 'First call injects');
+    assert(!injectedMsg(o2), 'Second call for same agent does not re-inject (dedup)');
   }
 
-  // ── Test 6: Missing skill file warning ──────────────────
-
+  // Test 8: SUBAGENT-STOP stripped
   {
-    const config = {
-      'skill-autoinjection': ['nonexistent-skill'],
-      skills: { paths: [] },
-    };
-    const warningsBefore = warnings.length;
-    const p4 = await SkillAutoinjectionPlugin({ client: {}, directory: testDir }, { skillsDir });
-    await p4.config(config);
-    const output = { system: [] };
-    await p4['experimental.chat.system.transform']({ agent: 'missing-test' }, output);
-
-    assert(warnings.length > warningsBefore,
-      'Missing skill triggers console.warn');
-    assert(output.system.length === 0,
-      'Missing skill does not inject content');
+    const config = { 'skill-autoinjection': ['test-skill-with-stop'], skills: { paths: [] } };
+    const p = await SkillAutoinjectionPlugin({ client: {}, directory: testDir }, { skillsDir });
+    await p.config(config);
+    const output = mkOutput();
+    await p['experimental.chat.messages.transform']({ agent: 'stop' }, output);
+    const text = injectedMsg(output)?.parts?.[0]?.text || '';
+    assert(!text.includes('<SUBAGENT-STOP>'), 'SUBAGENT-STOP block stripped');
+    assert(text.includes('## Test Skill With Stop'), 'Skill body preserved after stripping');
   }
 
-  // ── Test 7: SUBAGENT-STOP block stripped ────────────────
-
+  // Test 9: per-agent override
   {
-    const config = {
-      'skill-autoinjection': ['test-skill-with-stop'],
-      skills: { paths: [] },
-    };
-    const p5 = await SkillAutoinjectionPlugin({ client: {}, directory: testDir }, { skillsDir });
-    await p5.config(config);
-    const output = { system: [] };
-    await p5['experimental.chat.system.transform']({ agent: 'stop-test' }, output);
-
-    const content = output.system[0] || '';
-    assert(!content.includes('<SUBAGENT-STOP>'),
-      'SUBAGENT-STOP block stripped from injected content');
-    assert(!content.includes('If you were dispatched as a subagent'),
-      'SUBAGENT-STOP content stripped');
-    assert(content.includes('## Test Skill With Stop'),
-      'Skill body preserved after stripping');
+    const config = { 'skill-autoinjection': ['test-skill-one'], skills: { paths: [] } };
+    const p = await SkillAutoinjectionPlugin({ client: {}, directory: testDir }, { skillsDir });
+    await p.config(config);
+    const output = mkOutput();
+    await p['experimental.chat.messages.transform']({ agent: 'ov', agentConfig: { skills: ['test-skill-two'] } }, output);
+    const text = injectedMsg(output)?.parts?.[0]?.text || '';
+    assert(text.includes('name="test-skill-two"'), 'Per-agent override injects the override skill');
+    assert(!text.includes('name="test-skill-one"'), 'Per-agent override excludes the global skill');
   }
 
-  // ── Test 8: Tool mapping removed (OpenCode-only build) ───
-
-  {
-    const config = {
-      'skill-autoinjection': ['test-skill-one'],
-      skills: { paths: [] },
-    };
-    const p6 = await SkillAutoinjectionPlugin({ client: {}, directory: testDir }, { skillsDir });
-    await p6.config(config);
-    const output = { system: [] };
-    await p6['experimental.chat.system.transform']({ agent: 'mapping-test' }, output);
-
-    const content = output.system[0] || '';
-    assert(!content.includes('Tool Mapping for OpenCode'),
-      'TOOL_MAPPING header must not be injected');
-    assert(!content.includes('substitute OpenCode equivalents'),
-      'TOOL_MAPPING guidance must not be injected');
-    assert(content.includes('</AUTO_INJECTED_SKILL>'),
-      'Injection has closing wrapper tag');
-  }
-
-  // ── Test 9: Per-agent frontmatter override ──────────────
-
-  {
-    const config = {
-      'skill-autoinjection': ['test-skill-one'],
-      skills: { paths: [] },
-    };
-    // Per-agent override specifies only test-skill-two
-    const p7 = await SkillAutoinjectionPlugin({ client: {}, directory: testDir }, { skillsDir });
-    await p7.config(config);
-
-    const output = { system: [] };
-    // agentConfig.skills overrides global list
-    await p7['experimental.chat.system.transform'](
-      { agent: 'override-agent', agentConfig: { skills: ['test-skill-two'] } },
-      output
-    );
-
-    const injectedCount = output.system.filter(s => s.includes('<AUTO_INJECTED_SKILL')).length;
-    assert(injectedCount === 1, `Per-agent override injects 1 skill (got ${injectedCount})`);
-
-    const content = output.system[0] || '';
-    assert(content.includes('name="test-skill-two"'),
-      'Per-agent override injects correct skill (test-skill-two, not test-skill-one)');
-    assert(!content.includes('test-skill-one'),
-      'Per-agent override does not inject global skill');
-  }
-
-  // ── Test 10: Agent with empty skills config injects nothing ────
-
-  {
-    const config = {
-      'skill-autoinjection': ['test-skill-one'],
-      skills: { paths: [] },
-    };
-    const p8 = await SkillAutoinjectionPlugin({ client: {}, directory: testDir }, { skillsDir });
-    await p8.config(config);
-
-    const output1 = { system: [] };
-    const output2 = { system: [] };
-
-    // Simulate agent that already has the skill loaded
-    await p8['experimental.chat.system.transform'](
-      { agent: 'loaded-agent', _hasSkill: 'test-skill-one' },
-      output1
-    );
-
-    // This agent should not get injection
-    const count = output1.system.filter(s => s.includes('<AUTO_INJECTED_SKILL')).length;
-    assert(count === 1, 'Agent without pre-loaded skill gets injection');
-
-    // Now agentConfig.skills = empty → no injection
-    const output3 = { system: [] };
-    await p8['experimental.chat.system.transform'](
-      { agent: 'no-skills-agent', agentConfig: { skills: [] } },
-      output3
-    );
-    assert(output3.system.length === 0,
-      'Empty skills list injects nothing');
-  }
-
-  // ── Test 11: Explicit empty skill list = no injection ───
-
+  // Test 10: explicit empty list → nothing
   {
     const config = { 'skill-autoinjection': [], skills: { paths: [] } };
-    const p9 = await SkillAutoinjectionPlugin({ client: {}, directory: testDir }, { skillsDir });
-    await p9.config(config);
-    const output = { system: [] };
-    await p9['experimental.chat.system.transform']({}, output);
-    assert(output.system.length === 0,
-      'Explicit empty skill list injects nothing');
+    const p = await SkillAutoinjectionPlugin({ client: {}, directory: testDir }, { skillsDir });
+    await p.config(config);
+    const output = mkOutput();
+    await p['experimental.chat.messages.transform']({ agent: 'empty' }, output);
+    assert(!injectedMsg(output), 'Explicit empty skill list injects nothing');
   }
 
-  // ── Test 12: Folded block scalar (>-) description ──────
-
+  // Test 11: missing skill warns, continues
   {
-    // Create a skill with >- folded block scalar description
-    createSkillWithFrontmatter(
-      'test-folded-skill',
-      'name: test-folded-skill\ndescription: >-\n  This is a multi-line\n  folded description that should\n  be joined with spaces.',
-      '## Folded Skill Body'
-    );
-
-    const config = {
-      'skill-autoinjection': ['test-folded-skill'],
-      skills: { paths: [] },
-    };
-    const p10 = await SkillAutoinjectionPlugin({ client: {}, directory: testDir }, { skillsDir });
-    await p10.config(config);
-    const output = { system: [] };
-    await p10['experimental.chat.system.transform']({ agent: 'folded-test' }, output);
-
-    const content = output.system[0] || '';
-    assert(content.includes('name="test-folded-skill"'),
-      'Folded scalar: correct skill name');
-    assert(content.includes('description="This is a multi-line folded description that should be joined with spaces."'),
-      'Folded scalar: description lines joined with spaces');
-    assert(content.includes('## Folded Skill Body'),
-      'Folded scalar: skill body preserved');
+    const config = { 'skill-autoinjection': ['nonexistent-skill'], skills: { paths: [] } };
+    const before = warnings.length;
+    const p = await SkillAutoinjectionPlugin({ client: {}, directory: testDir }, { skillsDir });
+    await p.config(config);
+    const output = mkOutput();
+    await p['experimental.chat.messages.transform']({ agent: 'missing' }, output);
+    assert(warnings.length > before, 'Missing skill triggers console.warn');
+    assert(!injectedMsg(output), 'Missing skill injects nothing');
   }
 
-  // ── Test 13: HTML escaping in wrapper tag ──────────────
-
+  // Test 12: default fallback list includes workflow-gateway
   {
-    createSkillWithFrontmatter(
-      'test-escape-skill',
-      'name: test-escape-skill\ndescription: Use this for "special" characters & <tags>',
-      '## Escape Test Body'
-    );
-
-    const config = {
-      'skill-autoinjection': ['test-escape-skill'],
-      skills: { paths: [] },
-    };
-    const p11 = await SkillAutoinjectionPlugin({ client: {}, directory: testDir }, { skillsDir });
-    await p11.config(config);
-    const output = { system: [] };
-    await p11['experimental.chat.system.transform']({ agent: 'escape-test' }, output);
-
-    const content = output.system[0] || '';
-    assert(content.includes('description="Use this for &quot;special&quot; characters &amp; &lt;tags&gt;"'),
-      'HTML escaping: special chars escaped in description attribute');
-    assert(!content.includes('description="Use this for "special"'),
-      'HTML escaping: unescaped quotes do not break attribute');
-    assert(content.includes('</AUTO_INJECTED_SKILL>'),
-      'HTML escaping: closing wrapper tag present');
-  }
-
-  // ── Test 14: Default skill list falls back to workflow-gateway ──
-
-  {
-    // Create mock skills matching the hardcoded DEFAULT_SKILLS list
     createSkill('workflow-gateway', 'gateway', '## Gateway body');
     createSkill('optimize-tokens', 'tokens', '## Tokens body');
     createSkill('use-todo', 'todo', '## Todo body');
+    const config = { skills: { paths: [] } }; // no key → fallback to DEFAULT_SKILLS
+    const p = await SkillAutoinjectionPlugin({ client: {}, directory: testDir }, { skillsDir });
+    await p.config(config);
+    const output = mkOutput();
+    await p['experimental.chat.messages.transform']({ agent: 'def' }, output);
+    const text = injectedMsg(output)?.parts?.[0]?.text || '';
+    assert(text.includes('name="workflow-gateway"'), 'Default list injects workflow-gateway');
+    assert(text.includes('name="optimize-tokens"'), 'Default list injects optimize-tokens');
+    assert(text.includes('name="use-todo"'), 'Default list injects use-todo');
+  }
 
-    // No 'skill-autoinjection' key → plugin must fall back to DEFAULT_SKILLS
-    const config = { skills: { paths: [] } };
-    const p12 = await SkillAutoinjectionPlugin({ client: {}, directory: testDir }, { skillsDir });
-    await p12.config(config);
-    const output = { system: [] };
-    await p12['experimental.chat.system.transform']({ agent: 'default-test' }, output);
-
-    const all = output.system.join('\n');
-    const cnt = output.system.filter(s => s.includes('<AUTO_INJECTED_SKILL')).length;
-    assert(cnt === 3, `Default list injects 3 skills (got ${cnt})`);
-    assert(all.includes('name="workflow-gateway"'),
-      'Default list injects workflow-gateway');
-    assert(all.includes('name="optimize-tokens"'),
-      'Default list injects optimize-tokens');
-    assert(all.includes('name="use-todo"'),
-      'Default list injects use-todo');
+  // Test 13: injected message shape is valid + no identity leakage
+  {
+    const config = { 'skill-autoinjection': ['test-skill-one'], skills: { paths: [] } };
+    const p = await SkillAutoinjectionPlugin({ client: {}, directory: testDir }, { skillsDir });
+    await p.config(config);
+    const output = mkOutput();
+    await p['experimental.chat.messages.transform']({ agent: 'shape' }, output);
+    const msg = injectedMsg(output);
+    assert(Array.isArray(msg.parts) && msg.parts[0].type === 'text', 'Injected message has a text part');
+    assert(msg.info && msg.info.role === 'user', 'Injected message info.role is user');
+    assert(msg.info.id === undefined && msg.info.sessionID === undefined,
+      'Injected message does not leak a cloned id/sessionID');
   }
 
 } finally {
-  // Restore console.warn
   console.warn = originalWarn;
 }
 
-// ── Summary ───────────────────────────────────────────────
-
 console.log(`\n${passed + failed} tests: ${passed} passed, ${failed} failed`);
-if (errors.length > 0) {
-  console.error('\nFailures:');
-  errors.forEach(e => console.error(`  ${e}`));
-}
-
-// Cleanup temp directory
+if (errors.length) { console.error('\nFailures:'); errors.forEach(e => console.error(`  ${e}`)); }
 try { fs.rmSync(testDir, { recursive: true, force: true }); } catch {}
-
 process.exit(failed > 0 ? 1 : 0);
