@@ -75,7 +75,17 @@ Rules in `.docs/rules/` override all skill and default behavior — the orchestr
 
 ## Graphviz Diagrams
 
-Skills use `dot` code blocks for flowcharts. Install graphviz (`apt install graphviz`) and render:
+**When to use one.** At runtime the agent reads the `dot` *source*, not a rendered image — so a
+diagram buys nothing a clear table or list wouldn't, *except* for one shape: a **cyclic state
+machine** (a flow with back-edges — `hypothesis → wrong → new hypothesis`, `critique → revise →
+re-critique → escalate`). That's the shape prose and tables express poorly, and the only place a
+`dot` block earns its cost.
+
+- **Cyclic flow (loops / back-edges)** → `dot` diagram.
+- **Flat or tree-shaped decision** (routing, "if X → do Y") → a **decision table** or a numbered
+  **branch-list**. Clearer, cheaper in tokens, easier to maintain. Do *not* reach for graphviz here.
+
+Rendering is a human-maintenance aid only. Install graphviz (`apt install graphviz`) and render:
 ```bash
 dot -Tsvg -o diagram.svg diagram.dot
 ```
