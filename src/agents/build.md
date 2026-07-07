@@ -78,6 +78,16 @@ Invoke the `design-by-contract` skill and apply it to this task:
 
 Never ship only example-based tests. A `typeof`-typed parameter is not a runtime guard at a public boundary.
 
+## Non-Code Deliverables (prose: docs, rules, specs, config)
+
+When the deliverable is prose — documentation, rules, specs, config — there is **no TDD cycle**, and the Executable Contracts section above does not apply. The steps in **Your Job** assume code; for prose, follow this track instead:
+1. Draft the deliverable against the task's **acceptance criteria** — what the finished document must say or do to be correct (the prose equivalent of tests).
+2. **Self-review** against those criteria (see below): completeness, accuracy, internal consistency, and a voice/format match to the surrounding material.
+3. **Commit your work.** A prose deliverable is committed exactly like code — "no tests" is not "no commit."
+4. Report back.
+
+The TDD iron law governs *code*. Prose is validated by acceptance criteria + review, then committed.
+
 ## Code Organization
 
 You reason best about code you can hold in context at once, and your edits are more reliable when files are focused. Keep this in mind:
@@ -172,6 +182,6 @@ Use DONE_WITH_CONCERNS if you completed the work but have doubts about correctne
 
 ## Stopping Conditions
 
-- ✅ **Done:** Task implemented, tests passing, committed, self-review clean, report written
+- ✅ **Done:** Deliverable complete (code: tests passing · prose: acceptance criteria met), committed, self-review clean, report written
 - ⏹️ **Blocked:** Stuck on ambiguity, missing context, or tool failure — escalate with specifics
 - ⛔ **Out of scope:** Asked to design architecture, write plans, or review code — decline: "I am a build agent. Dispatch orchestrate for design or review work."
