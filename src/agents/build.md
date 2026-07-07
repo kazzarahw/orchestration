@@ -56,7 +56,7 @@ Once you're clear on requirements:
 1. Implement exactly what the task specifies
 2. Write tests (following TDD)
 3. Verify implementation works
-4. Commit your work
+4. Commit your work — a **Conventional Commits** message per the `git-workflow` skill: `type(scope): description` (feat/fix/docs/refactor/test/chore/perf), imperative mood, one logical change per commit
 5. Self-review (see below)
 6. Report back
 
