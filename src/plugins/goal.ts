@@ -10,6 +10,10 @@ import {
 import { join } from "path"
 import { randomUUID } from "crypto"
 
+// OpenCode fills id/sessionID/messageID at emit time. The SDK's Part type is not exported,
+// so the plugin supplies type+text and widens at this boundary.
+const textPart = (text: string): any => ({ type: "text", text })
+
 // ── State types ──────────────────────────────────────────
 
 type GoalStatus = "working" | "review" | "done" | "stalled" | "cancelled" | "paused"
@@ -379,10 +383,7 @@ export const GoalPlugin: Plugin = async ({ client, project, directory, worktree 
             lastIdleTime = 0
             currentGoal.status = currentGoal.status === "paused" ? "working" : currentGoal.status
             writeState(wt, currentGoal)
-            output.parts = [{
-              type: "text" as const,
-              text: `Resumed goal: "${currentGoal.goal}". Continuing from round ${currentGoal.round}.`,
-            }]
+            output.parts = [textPart(`Resumed goal: "${currentGoal.goal}". Continuing from round ${currentGoal.round}.`)]
           } else if (description) {
             // New goal replaces the pending one
             pendingResume = false
@@ -392,36 +393,24 @@ export const GoalPlugin: Plugin = async ({ client, project, directory, worktree 
             const newState = defaultState(description, wt)
             const ok = writeState(wt, newState)
             if (!ok) {
-              output.parts = [{ type: "text" as const, text: "Error: Could not save goal state." }]
+              output.parts = [textPart("Error: Could not save goal state.")]
               return
             }
             currentGoal = newState
             currentSessionID = input.sessionID || null
             active = true
-            output.parts = [{
-              type: "text" as const,
-              text: `New goal set: ${description}`,
-            }]
+            output.parts = [textPart(`New goal set: ${description}`)]
           } else {
-            output.parts = [{
-              type: "text" as const,
-              text: `A goal from a previous session was found: "${currentGoal.goal}". Type "/goal resume" to continue or "/goal <new>" to replace it.`,
-            }]
+            output.parts = [textPart(`A goal from a previous session was found: "${currentGoal.goal}". Type "/goal resume" to continue or "/goal <new>" to replace it.`)]
           }
           return
         }
 
         if (!description) {
           if (currentGoal && active) {
-            output.parts = [{
-              type: "text" as const,
-              text: `Active goal: "${currentGoal.goal}"\nStatus: ${currentGoal.status}\nRound: ${currentGoal.round}`,
-            }]
+            output.parts = [textPart(`Active goal: "${currentGoal.goal}"\nStatus: ${currentGoal.status}\nRound: ${currentGoal.round}`)]
           } else {
-            output.parts = [{
-              type: "text" as const,
-              text: "Usage: /goal <description>\nSet a goal and the agent will loop until it's verified complete.",
-            }]
+            output.parts = [textPart("Usage: /goal <description>\nSet a goal and the agent will loop until it's verified complete.")]
           }
           return
         }
@@ -436,10 +425,7 @@ export const GoalPlugin: Plugin = async ({ client, project, directory, worktree 
         const newState = defaultState(description, wt)
         const ok = writeState(wt, newState)
         if (!ok) {
-          output.parts = [{
-            type: "text" as const,
-            text: "Error: Could not save goal state. Check filesystem permissions.",
-          }]
+          output.parts = [textPart("Error: Could not save goal state. Check filesystem permissions.")]
           return
         }
 
@@ -448,10 +434,7 @@ export const GoalPlugin: Plugin = async ({ client, project, directory, worktree 
         active = true
         lastIdleTime = 0
 
-        output.parts = [{
-          type: "text" as const,
-          text: `You have been assigned a goal:\n\n${description}\n\nWork toward this goal. When done, use the goal_plugin_update tool to report progress. Set finite_incantatem=true only when you are certain the goal is 100% complete after inspecting the codebase. Then use goal_plugin_verify to check your work.`,
-        }]
+        output.parts = [textPart(`You have been assigned a goal:\n\n${description}\n\nWork toward this goal. When done, use the goal_plugin_update tool to report progress. Set finite_incantatem=true only when you are certain the goal is 100% complete after inspecting the codebase. Then use goal_plugin_verify to check your work.`)]
       } finally {
         mutex.release()
       }
