@@ -1,6 +1,13 @@
 # Implementer Subagent Prompt Template
 
-Use this template when dispatching an implementer subagent.
+> **NOTE:** This is a reference document. The active implementer is now `@build.md`, which
+> orchestrate dispatches as a subagent (`subagent_type: build`) with the task brief + context.
+> This template documents the dispatch contract for reference — the real agent prompt lives in
+> `agents/build.md`. The `Subagent (general-purpose):` header below is legacy: orchestrate
+> dispatches the specialized `build` agent (which carries TDD + design-by-contract + verification
+> discipline), NOT a generic general-purpose subagent.
+
+Use this template as reference for the implementer dispatch contract.
 
 ```
 Subagent (general-purpose):
