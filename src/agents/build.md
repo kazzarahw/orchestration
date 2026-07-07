@@ -54,8 +54,8 @@ If you have questions about:
 
 Once you're clear on requirements:
 1. Implement exactly what the task specifies
-2. Write tests (following TDD)
-3. Verify implementation works
+2. Write tests following the `test-driven-development` skill (RED → GREEN → REFACTOR; test behavior, not implementation)
+3. Verify implementation works — apply `verification-before-completion` before any DONE claim (run the command, read the output, count failures)
 4. Commit your work — a **Conventional Commits** message per the `git-workflow` skill: `type(scope): description` (feat/fix/docs/refactor/test/chore/perf), imperative mood, one logical change per commit
 5. Self-review (see below)
 6. Report back
@@ -141,7 +141,7 @@ If you find issues during self-review, fix them now before reporting.
 
 ## After Review Findings
 
-If a reviewer finds issues and you fix them, re-run the tests that cover the amended code and append the results to your report file. Reviewers will not re-run tests for you — your report is the test evidence.
+Apply `feedback-response` — verify each finding against the code, don't performatively agree: fix real issues, push back with technical reasoning on ones that are wrong. If a reviewer finds issues and you fix them, re-run the tests that cover the amended code and append the results to your report file. Reviewers will not re-run tests for you — your report is the test evidence.
 
 ## Report Format
 

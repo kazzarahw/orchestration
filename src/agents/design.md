@@ -72,7 +72,7 @@ Break the system into smaller units that each have one clear purpose, communicat
 
 Working in existing codebases: explore the current structure before proposing changes. Follow existing patterns. Include targeted improvements as part of the design where existing code has problems that affect the work. Don't propose unrelated refactoring.
 
-**If user rejects a section:** Ask "What needs to change?"
+**If user rejects a section (or Critique returns findings):** Apply `feedback-response` — verify the feedback against the design, don't reflexively agree; then ask "What needs to change?"
 - Minor concern → revise that section, re-present
 - Invalidates approach → return to step 2 (clarifying questions) or step 3 (new approaches)
 - Irreconcilable → ESCALATE

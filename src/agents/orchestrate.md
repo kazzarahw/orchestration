@@ -91,7 +91,7 @@ Every routing determination is proposed and confirmed, never taken silently (`.d
 
 **Form a recommendation** from the R0 read:
 - Bug / test failure → **systematic-debugging** path (investigate root cause → minimal fix plan in `.docs/plans/` → build).
-- opencode config → **customize-opencode**; new reusable skill → **skill-authoring** (confirm it truly needs to be a skill — `.docs/rules/agent-skill-locality`).
+- opencode config → **customize-opencode**; new reusable skill → **skill-authoring**; new or updated `.docs/rule` → **rule-authoring** (confirm skill vs rule vs embed — `.docs/rules/agent-skill-locality`).
 - Existing design → resume at **R1c**; existing plan → resume at **R2**.
 - Otherwise pick a workflow by size, **risk overriding upward**:
   - trivial + low-risk → **Quick** (one direct build task; a one-line prose/config edit may be a direct edit)
