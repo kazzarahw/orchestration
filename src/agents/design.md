@@ -29,7 +29,7 @@ permission:
     ".opencode/**": allow
   bash: deny
   todowrite: allow
-  question: allow
+  question: deny
   webfetch: allow
   websearch: allow
   skill: allow

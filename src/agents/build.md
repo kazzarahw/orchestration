@@ -15,7 +15,7 @@ permission:
   bash: allow
   task: deny
   todowrite: allow
-  question: allow
+  question: deny
   skill: allow
   webfetch: deny
   websearch: deny

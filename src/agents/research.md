@@ -104,7 +104,7 @@ permission:
     "*": deny
     "general": allow
   todowrite: allow
-  question: allow
+  question: deny
   webfetch: allow
   websearch: allow
   skill: allow
@@ -131,7 +131,7 @@ Before searching, clarify what you need to find:
 - What is the technology/framework/language involved?
 - What constraints or context apply?
 
-If the user's request is vague, use the `question` tool to ask for clarification.
+If the user's request is vague, ask for clarification in a plain message (the `question` tool is disabled framework-wide).
 
 ### Phase 2: Online Research
 

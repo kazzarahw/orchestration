@@ -26,6 +26,7 @@ permission:
     ".opencode/**": allow
   bash: deny
   task: deny
+  question: deny
   skill: allow
 ---
 
