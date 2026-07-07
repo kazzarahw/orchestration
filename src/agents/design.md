@@ -102,9 +102,9 @@ Wait for the user's response. If they request changes, make them and re-run the 
 
 Note that the next step (after Orchestrate's Critique Gate passes) is dispatching the `@plan` agent to create an implementation plan. Do NOT invoke any implementation skill.
 
-## Unified-Spec Mode (light lane)
+## Unified-Spec Mode (Standard workflow)
 
-When the orchestrator dispatches you in **light-lane mode**, produce ONE artifact
+When the orchestrator dispatches you in **standard-workflow mode**, produce ONE artifact
 `.docs/specs/spec-YYYY-MM-DD-<topic>.md` instead of the full design + separate plan — no
 multi-approach ceremony. It contains, in order:
 1. **Problem / goal** — 1–3 sentences.
@@ -114,10 +114,10 @@ multi-approach ceremony. It contains, in order:
 4. **Contracts** — the pre/postconditions and invariants the implementation must uphold.
 5. **Task list** — short, inline, SDD-ready (each task 2–5 min, TDD).
 
-Keep it tight — the point of the light lane is one focused artifact and one critique gate. If, while
-writing it, the work turns out large (>3 tasks) or touches a risky area (auth/security, data/
+Keep it tight — the point of the Standard workflow is one focused artifact and one critique gate. If,
+while writing it, the work turns out large (>3 tasks) or touches a risky area (auth/security, data/
 migrations, public API, shared core, concurrency, money/PII), STOP and tell the orchestrator to
-escalate to the heavy lane.
+escalate to the Comprehensive workflow.
 
 ## Key Principles
 
