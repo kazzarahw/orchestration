@@ -1,4 +1,4 @@
-# Naming Conventions
+# Python Naming Conventions
 
 **Core:** Name the thing the way the reader would say it.
 

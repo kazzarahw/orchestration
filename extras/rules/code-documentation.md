@@ -1,4 +1,4 @@
-# Python Code Documentation Rules
+# Python Code Documentation
 
 **Core:** Comments explain *why*; docstrings define *contract*; type hints enforce *interface*.
 

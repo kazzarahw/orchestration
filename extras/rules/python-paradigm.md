@@ -1,4 +1,4 @@
-# Python Programming Paradigm Rules
+# Python Programming Paradigm
 
 A convention for choosing and applying programming paradigms in Python 3.12+ codebases. Core principle: **Functions transform data; modules group functions; classes describe data. Avoid class inheritance.**
 
