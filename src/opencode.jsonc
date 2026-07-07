@@ -1,15 +1,18 @@
 {
+  "$schema": "https://opencode.ai/config.json",
+  "default_agent": "orchestrate",
   "plugin": [
-    "plugins/skill-autoinjection.js"
+    "plugins/skill-autoinjection.ts"
     // If goal.ts is in use, add it here after skill-autoinjection:
     // "plugins/goal.ts"
   ]
   // Skills injected by skill-autoinjection plugin (defaults):
+  //   workflow-gateway — always-on compliance gateway (1% Iron Law)
   //   optimize-tokens  — token-optimized output formatting
-  //   use-todo         — task list management
+  //   use-todo         — task list / progress source-of-truth
   //
   // Defaults are hardcoded in the plugin as fallback when OpenCode's config
   // parser strips custom keys. To override, pass the skill list via
   // SKILL_AUTOINJECTION environment variable (comma-separated names), or
-  // modify DEFAULT_SKILLS in src/plugins/skill-autoinjection.js.
+  // modify DEFAULT_SKILLS in src/plugins/skill-autoinjection.ts.
 }

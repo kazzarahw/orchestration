@@ -5,6 +5,12 @@ description: Use when needing isolated workspaces, branch management, or git wor
 
 # Use Git
 
+<IRON-LAW>
+NEVER implement a feature or fix on main/master without explicit consent. Isolate first
+(native worktree → git worktree/branch), or ask. "Just add it here" and "we're in a hurry" do
+NOT waive this — they tell you the goal and the pressure, not where to work.
+</IRON-LAW>
+
 ## Overview
 
 Work in isolated workspaces. Prefer native worktree tools. Fall back to git worktrees.
@@ -58,16 +64,10 @@ BASE_SHA=$(git rev-parse HEAD)
 - One logical change per commit — no bundled fixes
 - Use imperative mood: "Add retry logic" not "Added retry logic"
 
-## Step 4: Selective Commit Promotion (Cherry-Pick)
+## Step 4: Cherry-Pick
 
-When promoting commits from a worktree branch:
-
-```bash
-git log --oneline worktree-branch
-git cherry-pick <SHA>  # One at a time
-```
-
-Resolve conflicts with `git cherry-pick --continue` or `--abort` if unresolvable. Always test after cherry-pick.
+Promote worktree commits one at a time: `git cherry-pick <SHA>`; resolve conflicts with
+`--continue`/`--abort`; always test after.
 
 ## Step 5: Cleanup
 
