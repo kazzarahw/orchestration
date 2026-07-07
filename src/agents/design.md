@@ -4,7 +4,7 @@ description: >-
   Use for researching and designing solutions, brainstorming features, or clarifying requirements.
   Proposes approaches with trade-offs and writes design specs.
   NOT for implementing code or creating plans.
-mode: primary
+mode: subagent
 temperature: 0.5
 color: "#E67E22"
 permission:
