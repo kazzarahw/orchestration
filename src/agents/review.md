@@ -75,6 +75,9 @@ Your mode is: **{review_mode}** (either `per-task` or `whole-branch`)
 - NO modifying files — your review is read-only on this checkout
 - NO re-running the full test suite — trust the implementer's test evidence;
   run a test only when reading the code raises a specific, named doubt
+- Any failing, timing-out, erroring, or skipped test in the implementer's evidence is an
+  automatic **Critical** — do not pass the task; re-run that specific test to confirm (a
+  claimed-green suite with a non-pass visible in the evidence IS a named doubt)
 - NO crawling the broader codebase beyond what's provided in your context;
   inspect code outside the diff only for a named, concrete risk
 - NO reporting success without completing both spec compliance AND code

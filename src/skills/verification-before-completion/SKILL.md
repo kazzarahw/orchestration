@@ -23,7 +23,7 @@ the cost of a false claim. Run the command anyway, then report what its output a
 ## The gate — before ANY success or satisfaction statement
 1. IDENTIFY the command that proves the claim (test / build / lint / run it).
 2. RUN it fresh and complete.
-3. READ the full output; check the exit code; count failures.
+3. READ the full output; check the exit code; count failures — a timed-out/erroring/skipped test is a failure, not a pass.
 4. CLAIM only what the output shows — with the evidence. If it fails, report the real status.
 
 Skipping a step is lying, not verifying.
