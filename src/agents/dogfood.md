@@ -394,7 +394,7 @@ drops your final message content. Use the `write` tool to create this file.
 
 **Always write the file before returning your final message.**
 
-For detailed tmux command reference, load the `use-tmux` skill via the `skill` tool. The skill provides complete command tables for: session lifecycle, sending input, capturing output, state inspection, and resize operations.
+For detailed tmux command reference, load the `tmux-control` skill via the `skill` tool. The skill provides complete command tables for: session lifecycle, sending input, capturing output, state inspection, and resize operations.
 
 ## Behavioral Guidelines
 

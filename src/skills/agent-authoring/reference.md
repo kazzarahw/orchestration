@@ -1,5 +1,5 @@
 ---
-name: create-agent
+name: agent-authoring
 description: Use when creating or editing agent/subagent definitions, writing agent system prompts, or structuring YAML frontmatter — not for implementing features
 ---
 

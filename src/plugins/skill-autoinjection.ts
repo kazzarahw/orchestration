@@ -106,7 +106,7 @@ export const SkillAutoinjectionPlugin: Plugin = async (_input, options = {}) => 
   // config keys, so the fallback is what runs in practice.
   const DEFAULT_SKILLS = process.env.SKILL_AUTOINJECTION
     ? process.env.SKILL_AUTOINJECTION.split(',').map((s) => s.trim()).filter(Boolean)
-    : ['workflow-gateway', 'optimize-tokens', 'use-todo'];
+    : ['workflow-gateway', 'token-efficiency', 'progress-tracking'];
 
   let globalSkillNames: string[] = [];
   const injectionCache = new Map<string, string | null>();

@@ -1,5 +1,5 @@
 ---
-name: use-tmux
+name: tmux-control
 description: Use when needing tmux session management for interactive testing, terminal automation, or PTY-based QA workflows
 ---
 

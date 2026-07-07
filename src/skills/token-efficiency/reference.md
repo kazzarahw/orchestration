@@ -1,5 +1,5 @@
 ---
-name: optimize-tokens
+name: token-efficiency
 description: Use when producing any natural-language output — maximizes information density (term-of-art substitution, phrasal packing, nominalization, given-new ordering, quantification, contrastive definitions, BNF, implicature, presupposition packing) to minimize output tokens without losing technical accuracy; lossy techniques are gated to human-only audiences.
 metadata:
   alias: maximizing-information-density

@@ -1,5 +1,5 @@
 ---
-name: optimize-tokens
+name: token-efficiency
 description: Use when producing any natural-language output — maximize information density without losing accuracy; lossy techniques gated to human audiences
 ---
 # Optimize Tokens

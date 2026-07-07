@@ -1,5 +1,5 @@
 ---
-name: create-plugin
+name: plugin-authoring
 description: Use when creating, editing, or troubleshooting OpenCode plugins — not for MCP server config or writing agents/skills/rules
 ---
 

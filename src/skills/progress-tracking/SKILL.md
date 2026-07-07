@@ -1,5 +1,5 @@
 ---
-name: use-todo
+name: progress-tracking
 description: Use when tracking progress across 3+ distinct steps or multi-step work — the todo list is your authoritative source of truth for progress
 ---
 # Use Todo

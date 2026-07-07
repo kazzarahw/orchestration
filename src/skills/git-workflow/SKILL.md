@@ -1,5 +1,5 @@
 ---
-name: use-git
+name: git-workflow
 description: Use when needing isolated workspaces, branch management, or git workflow guidance during development
 ---
 

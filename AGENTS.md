@@ -36,7 +36,7 @@ Skills live at `src/skills/<name>/SKILL.md`. Each file has YAML frontmatter (`na
 
 Check with: `wc -w src/skills/<name>/SKILL.md`
 
-**Creating new skills** currently follows the TDD process in `src/skills/create-skill/SKILL.md` (Iron Law: no skill without a failing pressure-scenario test first), but check with the user if conventions are evolving.
+**Creating new skills** currently follows the TDD process in `src/skills/skill-authoring/SKILL.md` (Iron Law: no skill without a failing pressure-scenario test first), but check with the user if conventions are evolving.
 
 ## Agents
 
@@ -51,7 +51,7 @@ The `src/agents/orchestrate.md` primary agent is the main entry point for all de
 
 ## Plugins
 
-`src/plugins/skill-autoinjection.js` — OpenCode plugin that injects `optimize-tokens` and `use-todo` skills into every session turn via the `system.transform` hook. Replaces the former `using-superpowers` skill + `superpowers.js` autoinjection pair.
+`src/plugins/skill-autoinjection.js` — OpenCode plugin that injects `token-efficiency` and `progress-tracking` skills into every session turn via the `system.transform` hook. Replaces the former `using-superpowers` skill + `superpowers.js` autoinjection pair.
 
 `src/plugins/goal.ts` — OpenCode plugin providing the `/goal <description>` command. Implements a state machine (`working → review → done/stalled/cancelled`) with stagnation detection, auto-continuation via `session.idle` events, and three tools: `goal_plugin_get`, `goal_plugin_update`, `goal_plugin_verify`. State persists to `.opencode/goals/state.json`.
 
@@ -61,7 +61,7 @@ The `src/agents/orchestrate.md` primary agent is the main entry point for all de
 |------|---------|
 | `.docs/designs/` | Design documents (from brainstorming skill) |
 | `.docs/plans/` | Implementation plans (from plan agent) |
-| `.docs/rules/*.md` | Mandatory project constraints (from create-rule skill) |
+| `.docs/rules/*.md` | Mandatory project constraints (from rule-authoring skill) |
 | `.docs/reports/` | Critique, review, and dogfood QA reports |
 
 Rules in `.docs/rules/` override all skill and default behavior — the orchestrator agent re-reads them after any working directory change.
@@ -92,8 +92,8 @@ runtime-neutral in phrasing where it costs nothing, but portability is no longer
 
 ## Key Skill Dependency Chain
 
-`skill-autoinjection` plugin → loads `optimize-tokens` + `use-todo` on every session turn  
+`skill-autoinjection` plugin → loads `token-efficiency` + `progress-tracking` on every session turn  
 Orchestrate → delegates Design (brainstorming embedded) → Plan (plan agent) → Build (subagent-driven-development)  
 → final Review + optional Dogfood → branch finish (embedded in orchestrate R4)
 
-Cross-cutting (apply throughout): `systematic-debugging`, `test-driven-development`, `verification-before-completion`, `use-git`.
+Cross-cutting (apply throughout): `systematic-debugging`, `test-driven-development`, `verification-before-completion`, `git-workflow`.

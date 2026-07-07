@@ -1,5 +1,5 @@
 ---
-name: create-rule
+name: rule-authoring
 description: Use when creating or updating a guideline document intended to direct agent behavior — before writing the document itself
 ---
 # Create Rule
@@ -20,7 +20,7 @@ Project-specific conventions whose audience includes other agents: naming, codin
 architectural boundaries, commit/PR conventions.
 - **≤5 rules, single category → put it in `AGENTS.md`/`CLAUDE.md`**, not a separate doc (threshold:
   when the doc would need its own table of contents).
-- Cross-project reusable technique → `create-skill`. Agent definition → `create-agent`. Plan → plan agent.
+- Cross-project reusable technique → `skill-authoring`. Agent definition → `agent-authoring`. Plan → plan agent.
 
 ## Process
 1. **Audit** — grep the codebase / check the ecosystem for the existing convention (30s minimum). Don't invent.

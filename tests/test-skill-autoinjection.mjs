@@ -155,8 +155,8 @@ try {
   // Test 12: default fallback list includes workflow-gateway
   {
     createSkill('workflow-gateway', 'gateway', '## Gateway body');
-    createSkill('optimize-tokens', 'tokens', '## Tokens body');
-    createSkill('use-todo', 'todo', '## Todo body');
+    createSkill('token-efficiency', 'tokens', '## Tokens body');
+    createSkill('progress-tracking', 'todo', '## Todo body');
     const config = { skills: { paths: [] } }; // no key → fallback to DEFAULT_SKILLS
     const p = await SkillAutoinjectionPlugin({ client: {}, directory: testDir }, { skillsDir });
     await p.config(config);
@@ -164,8 +164,8 @@ try {
     await p['experimental.chat.messages.transform']({ agent: 'def' }, output);
     const text = injectedMsg(output)?.parts?.[0]?.text || '';
     assert(text.includes('name="workflow-gateway"'), 'Default list injects workflow-gateway');
-    assert(text.includes('name="optimize-tokens"'), 'Default list injects optimize-tokens');
-    assert(text.includes('name="use-todo"'), 'Default list injects use-todo');
+    assert(text.includes('name="token-efficiency"'), 'Default list injects token-efficiency');
+    assert(text.includes('name="progress-tracking"'), 'Default list injects progress-tracking');
   }
 
   // Test 13: injected message shape is valid + no identity leakage

@@ -8,8 +8,8 @@
   ]
   // Skills injected by skill-autoinjection plugin (defaults):
   //   workflow-gateway — always-on compliance gateway (1% Iron Law)
-  //   optimize-tokens  — token-optimized output formatting
-  //   use-todo         — task list / progress source-of-truth
+  //   token-efficiency  — token-optimized output formatting
+  //   progress-tracking         — task list / progress source-of-truth
   //
   // Defaults are hardcoded in the plugin as fallback when OpenCode's config
   // parser strips custom keys. To override, pass the skill list via

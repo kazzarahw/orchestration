@@ -1,5 +1,5 @@
 ---
-name: consider-feedback
+name: feedback-response
 description: Use when receiving code review or critique feedback, before implementing suggestions — requires technical verification, not performative agreement or blind implementation
 ---
 # Consider Feedback
