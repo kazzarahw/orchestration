@@ -68,9 +68,13 @@ slips. Approach 2's full skill is rejected — its durability is captured more c
 contract into the **existing SDD progress ledger** (`.opencode/sdd/progress.md`) rather than a new
 artifact type, and its decomposition logic lives fine inside R0.5.
 
-The guarantee is additionally codified as a new **`.docs/rules/diligence.md`** — a mandatory
-constraint loaded at R0 and propagated to subagents — so it is structural (rules override skills and
-defaults) and not merely agent-body prose.
+The guarantee is anchored **structurally** in two *deployed* layers: a hard line in the `orchestrate`
+agent's **Strict Boundaries** (the agent system prompt — highest precedence, always present) and a
+short **Diligence** section in the global **`src/AGENTS.md`** (deployed to
+`~/.config/opencode/AGENTS.md`, loaded every session including workers). Explicitly **not** a
+`.docs/rules/` file — those are project-local and undeployed (`install.sh` ships only `agents`,
+`plugins`, `skills`, `commands`, `AGENTS.md`, `CLAUDE.md`, `opencode.jsonc`), so a repo-local rule
+would bind only while developing this repo, never on real user tasks.
 
 ## Design Details
 
@@ -162,20 +166,39 @@ Critical/Important finding handled by the normal fix-loop. For a convergent requ
 "was the termination condition genuinely met (not the cap hit with items remaining)?" — a cap-hit with
 open items is surfaced to the human, not silently accepted as done.
 
-### Section 6: The new rule — `.docs/rules/diligence.md`
+**Open-ended requests get a re-discovery pass (dogfood refinement, 2026-07-14).** Live dogfooding
+(`.docs/reports/dogfood-2026-07-13-diligence.md`) showed the weak model classifies "fix all X" as
+*enumerable* whenever it can read and enumerate the items — correct, but it means the completeness
+check would verify only the *enumerated subset*, missing items that surface only *after* the fixes.
+So the distinction that matters at the gate is **closed vs open-ended**, not enumerable vs convergent:
+a *closed* request ("X and Y") is done when its named parts pass; an *open-ended* request ("all X",
+"every", "fully", "until clean") is done only when **one fresh re-discovery pass comes back clean** —
+regardless of whether pass 1 was handled as an enumerable list or a convergent loop. New items from
+re-discovery are added to the contract and fixed (a convergent iteration); a cap-hit with items still
+open is surfaced. This attaches convergent's termination guarantee to the request's *phrasing*, so it
+engages even when the weak model did not pre-commit to a loop.
 
-A mandatory constraint stating the guarantee, in the house rule format (see [[explicit-over-implicit]],
-[[prose-is-first-class]]):
+### Section 6: The structural anchor — deployed layers, not a project-local file
 
-- Every stated part of a request is accounted for before any delegation; none is silently dropped.
-- Open-ended requests loop to an explicit termination condition, capped; a cap-hit with open items is
-  surfaced, not accepted.
-- Err toward thorough when all else is equal; depth beyond that is proposed, not imposed.
-- The accounting is mandatory; the execution weight scales to the work.
+`.docs/rules/` is project-local and never deployed (`install.sh` ships only `agents`, `plugins`,
+`skills`, `commands`, `AGENTS.md`, `CLAUDE.md`, `opencode.jsonc`) — a repo-local rule would bind only
+while developing this repo. The guarantee is therefore stated in **two deployed layers**:
 
-Loaded at R0, re-read on working-directory change, propagated to subagents (rules override skills and
-defaults). This is the structural anchor — the weak model follows a loaded rule, not a buried
-paragraph.
+1. **`src/agents/orchestrate.md` — Strict Boundaries.** One hard line added to the existing NO-list
+   (the agent system prompt: highest precedence, always present, the weak-model-proof spot):
+   *NO delegation before a confirmed Coverage Contract that accounts for every part of the request.*
+2. **`src/AGENTS.md` — a short "Diligence / Complete Coverage" section** (deployed to
+   `~/.config/opencode/AGENTS.md`, loaded every session including workers — the universal,
+   auto-propagating home a rule wanted). It states, in the house format (cf. [[explicit-over-implicit]],
+   [[prose-is-first-class]]):
+   - Every stated part of a request is accounted for before any delegation; none is silently dropped.
+   - Open-ended requests loop to an explicit termination condition, capped; a cap-hit with open items
+     is surfaced, not accepted.
+   - Err toward thorough when all else is equal; depth beyond that is proposed, not imposed.
+   - The accounting is mandatory; the execution weight scales to the work.
+
+This is the structural anchor — the weak model follows a top-precedence boundary + a global rule, not
+a buried paragraph.
 
 ### Section 7: Persisted artifact — inside the progress ledger
 

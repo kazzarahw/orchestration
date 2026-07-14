@@ -382,3 +382,7 @@ git commit -m "docs(report): diligence dogfood — enumerable + convergent shape
 **Consistency:** "Coverage Contract", "termination condition", "safety cap", "err toward thorough" used identically across Tasks 1–5. Ledger format defined in Task 4 is the exact artifact Task 5 reads. review.md input name `[COVERAGE_CONTRACT]` matches the R3b instruction to "pass the Coverage Contract from the ledger."
 
 **One gap fixed inline:** Task 2 Step 4's trailing note now covers the Quick-lane no-ledger case (so Task 4/5's ledger dependency doesn't strand trivial tasks).
+
+## Addendum — Task 7 (dogfood-driven)
+
+Task 6's live dogfood (`.docs/reports/dogfood-2026-07-13-diligence.md`) verified the enumerable Coverage Contract + proportionality on the weak model, but showed the model classifies "fix all X" as *enumerable* whenever it can enumerate — so convergent's termination guarantee never engaged for open-ended requests. **Task 7** closes that gap: an **open-ended vs closed** axis at R0.5, and a mandatory **re-discovery pass** at the completeness gate for open-ended requests (a fresh scan after the fixes; done only when it returns clean, else a convergent iteration or a surfaced cap-hit). Files: `orchestrate.md` (R0.5 + R3b), `review.md`, design §5. This makes the termination guarantee attach to the request's *phrasing*, not the model's up-front classification choice.

@@ -186,6 +186,7 @@ Use this when reviewing the full feature branch before merge.
 **Coverage completeness (if a Coverage Contract is provided in your inputs):**
 - Is every part listed in the contract addressed by the diff? An unaddressed or partially-addressed part is a **Critical** finding (missing requirement) — name the specific part.
 - For a convergent contract: did the branch reach the stated **termination condition**, or did it stop at the **safety cap** with items still open? A cap-stop with open items is an **Important** finding to surface, not a pass.
+- If the **original request is open-ended** (asks for *all* / *every* / *any* of something, or "until clean/green" — judge by the request wording, not by how the contract was labeled): is there evidence of a **re-discovery pass** — a fresh scan run *after* the fixes that came back clean? If the branch only fixed the initially-enumerated items with no clean re-discovery, flag it **Important**: the "all" may be incomplete.
 
 **Code quality:**
 - Clean separation of concerns across the full diff?
