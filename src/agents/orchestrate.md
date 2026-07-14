@@ -282,9 +282,9 @@ Use the Subagent-Driven Development (SDD) pattern to execute each task:
 **Durable progress:**
 - Maintain a progress ledger at `.opencode/sdd/progress.md`
 - Write the confirmed **Coverage Contract** as a header block at the top of the ledger when the workspace is created (≤ R2): each enumerable part on its own status line (`- [ ] Part: <…> → <task(s)>`), updated to `- [x]` only after that part's work passes review. For a **convergent** request, record the loop, termination condition, and cap, then append one line per iteration (`Iteration N: <found> / <verified> / <fixed>; termination met? <yes/no>`).
-- The contract header is the completeness source of truth: after compaction, trust it + `git log` over recollection to see what parts remain. No part flips to `[x]` without review evidence.
+- The contract header is the completeness source of truth: after compaction, trust it (plus the commit SHAs subagents reported into it) over recollection to see what parts remain. No part flips to `[x]` without review evidence.
 - After each clean review, append: `Task N: complete (commits <base7>..<head7>, review clean)`
-- After compaction, trust the ledger and `git log` over recollection
+- After compaction, trust the ledger (and the subagent-reported SHAs it records) over recollection
 - Check for existing ledger at skill start to resume interrupted sessions
 
 **Per-task review requests** (embedded from requesting-code-review):
@@ -314,8 +314,8 @@ The `@review` agent checks:
 - Production readiness — migrations, backward compat, docs?
 
 **Whole-branch review requests** (embedded from requesting-code-review):
-- Get commit range from branch start
-- Dispatch `@review` with: plan/spec, diff file, minor issues list, and the Coverage Contract from the ledger
+- The commit range (branch `base..head`) comes from the ledger's recorded SHAs / the setup report — you do not run `git`; `@review` fetches its own diff.
+- Dispatch `@review` with: plan/spec, the `base..head` range, worktree path, minor issues list, and the Coverage Contract from the ledger
 - Act on feedback: fix CRIT/IMP, note MINOR/LOW
 
 **Coverage completeness (mandatory):** pass the Coverage Contract from the ledger to `@review`, and require a completeness verdict — is **every** part of the contract addressed by the branch? An unaddressed part is a **Critical/Important** finding: dispatch a build subagent to close it, then re-review. For a **convergent** request, require confirmation that the **termination condition was genuinely met** — if the branch stopped because the safety cap was reached with items still open, that is surfaced to the human (raise cap / narrow / stop), never accepted as done. **If the original request is open-ended in phrasing** — it asks for *all* / *every* / *any* of something, or "until clean/green" (check the request text recorded in the contract, **regardless of how R0.5 classified the shape** — the weak model tends to collapse a small "all X" target to enumerable, so do not rely on the R0.5 flag alone) — completeness additionally requires **one re-discovery pass**: after the enumerated parts pass, dispatch a fresh **`@research`** pass to examine the result and surface any remaining issues, and/or re-run the request's defining check (tests / lint / typecheck / scanner). New verified items are added to the contract and fixed as a convergent iteration; the request is done only when a re-discovery pass returns clean, or the cap is hit → surface to the human. This closes the gap where a first-pass enumeration misses items that surface only after the fixes. (For a single-task **Standard** feature whose per-task review is the review, pass the Coverage Contract to that review so the same completeness check applies there.)
@@ -336,20 +336,11 @@ If the implementation produces an interactive CLI, TUI, or terminal-based progra
 
 ### Phase R4: Finish (Merge/PR/Discard)
 
-Apply the branch finishing process (embedded from finishing-a-development-branch):
+You gate and delegate; you run no git or tests. Apply the branch finishing process (embedded from finishing-a-development-branch):
 
-**Step 1: Verify Tests**
-```bash
-# Run project's test suite
-npm test / cargo test / pytest / go test ./...
-```
-If tests fail, stop. Don't proceed to Step 2.
+**Step 1: Verify tests (delegated).** Dispatch `@build` to run the project's full suite in the worktree and report pass/fail + counts. If tests fail, **stop** — do not offer finish options; return to fixing.
 
-**Step 2: Detect Environment**
-```bash
-GIT_DIR=$(cd "$(git rev-parse --git-dir)" 2>/dev/null && pwd -P)
-GIT_COMMON=$(cd "$(git rev-parse --git-common-dir)" 2>/dev/null && pwd -P)
-```
+**Step 2: Environment (from the recorded state, not fresh git).** Use the isolation state recorded at R2 — worktree path, in-place, or detached-HEAD — from the setup report and ledger; do not re-detect with git.
 
 | State | Menu | Cleanup |
 |-------|------|---------|
@@ -357,11 +348,7 @@ GIT_COMMON=$(cd "$(git rev-parse --git-common-dir)" 2>/dev/null && pwd -P)
 | `GIT_DIR != GIT_COMMON`, named branch | Standard 4 options | Provenance-based |
 | `GIT_DIR != GIT_COMMON`, detached HEAD | Reduced 3 options (no merge) | No cleanup (externally managed) |
 
-**Step 3: Determine Base Branch**
-```bash
-git merge-base HEAD main 2>/dev/null || git merge-base HEAD master 2>/dev/null
-```
-Or ask: "This branch split from main — is that correct?"
+**Step 3: Base branch** — from the ledger / setup report (the branch was created off a known base at R2). If genuinely unknown, ask: "This branch split from `main` — is that correct?"
 
 **Step 4: Present Options**
 
@@ -382,22 +369,19 @@ Implementation complete. You're on a detached HEAD (externally managed workspace
 3. Discard this work
 ```
 
-**Step 5: Execute Choice**
+**Step 5: Execute the choice — dispatch `@build`** to perform the git/test ops and report back; you never run them:
 
-- **Merge Locally:** Merge, verify tests, cleanup worktree (Step 6), delete branch
-- **Push and Create PR:** Push branch. Do NOT clean up worktree.
-- **Keep As-Is:** Report status. Don't cleanup.
-- **Discard:** Confirm with typed "discard". Cleanup worktree (Step 6), force-delete branch.
+- **Merge Locally:** merge, re-verify tests on the result, cleanup worktree (Step 6), delete branch.
+- **Push and Create PR:** push branch; do NOT clean up worktree.
+- **Keep As-Is:** nothing to run — report status.
+- **Discard:** you gate on a typed **"discard"** from the human first, then dispatch cleanup worktree (Step 6) + force-delete branch.
 
-**Step 6: Cleanup Workspace (Options 1 and 4 only)**
-```bash
-GIT_DIR=$(cd "$(git rev-parse --git-dir)" 2>/dev/null && pwd -P)
-GIT_COMMON=$(cd "$(git rev-parse --git-common-dir)" 2>/dev/null && pwd -P)
-WORKTREE_PATH=$(git rev-parse --show-toplevel)
-```
-- If `GIT_DIR == GIT_COMMON`: Normal repo, no worktree to clean up. Done.
-- If worktree path is under `.worktrees/` or `worktrees/`: we own cleanup. `git worktree remove`, `git worktree prune`.
-- Otherwise: host environment owns workspace. Leave in place.
+Relay the `@build` finish report to the user.
+
+**Step 6: Cleanup Workspace (Options 1 and 4 only) — instructions in the `@build` finish brief, not run by you:**
+- Normal repo (no separate worktree): nothing to clean up.
+- Worktree under `.worktrees/`/`worktrees/` (we created it): `git worktree remove` + `git worktree prune`, from the main repo, never from inside the worktree.
+- Otherwise (host-owned workspace): leave in place.
 
 **Red Flags (finishing):**
 - Never proceed with failing tests
@@ -425,10 +409,9 @@ Apply `token-efficiency` to ALL user-facing output:
 - Never abbreviate literals: code, identifiers, paths, commands, errors, versions
 
 ### Verification Before Claims
-Apply `verification-before-completion` before ANY success claim:
-- Run the FULL verification command fresh
-- Read full output, check exit code, count failures
-- Only then say "passes" or "done"
+Apply `verification-before-completion` before ANY success claim — but you run nothing yourself:
+- Require the subagent to run the FULL verification fresh and report the raw evidence (exit code, failure counts) in its structured summary.
+- Claim "passes"/"done" only from that reported evidence; if a report lacks it, send the subagent back — never assert success on recollection.
 
 ### Debugging
 Apply `systematic-debugging` for ANY bug, failure, or unexpected behavior:
