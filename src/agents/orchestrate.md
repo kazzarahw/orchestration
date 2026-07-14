@@ -193,6 +193,37 @@ Then dispatch `@review` in whole-branch mode for plan review.
 
 Both gates must pass before proceeding to R2.
 
+### Convergent Mode (Comprehensive lane)
+
+When R0.5 classifies the request as **convergent**, the Comprehensive lane's plan→build→review cycle runs inside an outer convergence loop instead of as a single linear pass. This reuses the same capped loop-until-clean pattern the critique/review/dogfood gates already run — lifted from inside a gate to the whole workflow.
+
+Each **iteration**:
+1. **Discover** — dispatch `@research`/`@review` (or a build task in find-only mode) to surface candidate items (bugs, gaps, uncovered lines).
+2. **Verify** — confirm each candidate is real before acting on it (avoids chasing false positives from a weak finder).
+3. **Plan + apply** — plan the fixes, dispatch `@build` per fix (TDD), per-task review.
+4. **Re-discover** — run the discovery pass again against the new state.
+
+**Termination:** stop when a full re-discovery pass finds **zero new verified items** — the termination condition committed in the Coverage Contract. **Safety cap:** bound the iterations (mirrors the critique gate's 3-iteration cap; pick the cap in the contract). If the cap is reached with items still open, **surface that to the human as an explicit outcome** (raise cap / narrow scope / stop) — never report it as done. Track iteration count + the termination check in the SDD ledger (see R3 Durable progress).
+
+```dot
+digraph convergent {
+  rankdir=TB;
+  start    [label="Request:\n\"fix all bugs\"", shape=ellipse];
+  discover [label="Discover\n(review / find)", shape=box];
+  gate     [label="New verified\nitems?", shape=diamond];
+  verify   [label="Verify candidates", shape=box];
+  act      [label="Plan + apply fixes\n(build, TDD, review)", shape=box];
+  finish   [label="Finish", shape=box];
+  start -> discover;
+  discover -> gate;
+  gate -> verify [label="yes, unverified"];
+  verify -> gate;
+  gate -> act    [label="yes, verified"];
+  act  -> discover [label="re-discover (≤ cap)"];
+  gate -> finish [label="none  /  cap reached"];
+}
+```
+
 ### Phase R2: Setup Worktree + Baseline
 
 Load `git-workflow` via `skill` tool (it is NOT autoinjected):
