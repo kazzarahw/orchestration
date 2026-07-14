@@ -94,7 +94,7 @@ Frame entirely from `read`/`grep`/`glob` over the repo and `.docs/` — you cann
 Every routing determination is proposed and confirmed, never taken silently (`.docs/rules/explicit-over-implicit`). Present the proposal as a **plain message** and STOP for the user's reply — do NOT use the `question` tool, and do NOT begin work on an assumption.
 
 **Form a recommendation** from the R0 read:
-- Bug / test failure → **systematic-debugging** path (investigate root cause → minimal fix plan in `.docs/plans/` → build).
+- Bug / test failure → **systematic-debugging** path: dispatch `@research` (it has bash) to investigate and report the root cause → minimal fix plan in `.docs/plans/` → `@build`. You do not investigate by hand.
 - opencode config → **customize-opencode**; new reusable skill → **skill-authoring**; new or updated `.docs/rule` → **rule-authoring** (confirm skill vs rule vs embed — `.docs/rules/agent-skill-locality`).
 - Existing design → resume at **R1c**; existing plan → resume at **R2**.
 - Otherwise pick a workflow by size, **risk overriding upward**:
@@ -246,11 +246,11 @@ Use the Subagent-Driven Development (SDD) pattern to execute each task:
 **1. Read plan file, extract all tasks, create todos**
 
 **2. For each task:**
-   a. **Build subagent** — dispatch with full task text + context (using `scripts/task-brief` to extract task)
+   a. **Build subagent** — dispatch with the task's full text + context + the **worktree path**. Extract the task by reading the plan and writing the brief yourself to `.opencode/sdd/task-N-brief.md` (you have `.opencode`/`.md` write — no shell needed).
       - Must follow TDD: RED (failing test) → GREEN (minimal code) → REFACTOR
       - Self-reviews before returning
       - Handle status:
-        - DONE → generate review package (`scripts/review-package BASE HEAD`), proceed to review
+        - DONE → take the build's reported commit SHAs (base..head, in its summary) and proceed to review (the reviewer generates its own diff)
         - DONE_WITH_CONCERNS → read concerns, address before review if about correctness
         - NEEDS_CONTEXT → provide missing context, re-dispatch
         - BLOCKED → assess: context problem (re-dispatch with more context), reasoning problem (upgrade model), task too large (split), plan wrong (escalate)
@@ -268,15 +268,15 @@ Use the Subagent-Driven Development (SDD) pattern to execute each task:
 - Group failures by what's broken: each agent gets specific scope, clear goal, constraints, expected output
 - After agents return: review each summary, check for conflicts, run full suite, spot-check
 
-**SDD scripts reference:**
-- `scripts/task-brief PLAN_FILE TASK_N [OUTFILE]` — extracts one task from a plan into a brief file
-- `scripts/review-package BASE HEAD [OUTFILE]` — generates a diff package (commits + stat + diff) for a reviewer subagent
-- `scripts/sdd-workspace` — resolves/creates `.opencode/sdd/` (gitignored artifact dir)
+**SDD coordination (handless — use read/write, not the shell):**
+- **Task brief:** read the plan and write the task's text to `.opencode/sdd/task-N-brief.md` yourself.
+- **Workspace:** create `.opencode/sdd/` by writing to it (your `.opencode` write covers this).
+- **Review diff:** you do NOT generate it — pass the `base..head` SHA range (from the build's report / the ledger) to `@review`, which fetches its own diff (it has bash). The `scripts/{task-brief,review-package,sdd-workspace}` helpers remain for hands-agents that want them; you never run them.
 
 **File handoffs:**
-- **Task brief:** before dispatching, run `scripts/task-brief PLAN_FILE N` — it extracts the task's full text to a uniquely named file
+- **Task brief:** write it yourself (read plan → write `…/task-N-brief.md`); include the worktree path.
 - **Report file:** name after the brief (brief `…/task-N-brief.md` → report `…/task-N-report.md`)
-- **Reviewer inputs:** the task reviewer gets three paths — brief file, report file, and review package
+- **Reviewer inputs:** the task reviewer gets the brief path, the report path, and the `base..head` SHA range (it fetches its own diff)
 - Fix dispatches append their fix report to the same report file
 
 **Durable progress:**
@@ -288,8 +288,8 @@ Use the Subagent-Driven Development (SDD) pattern to execute each task:
 - Check for existing ledger at skill start to resume interrupted sessions
 
 **Per-task review requests** (embedded from requesting-code-review):
-- Get commit range: `BASE_SHA=$(git merge-base origin/main HEAD)`, `HEAD_SHA=$(git rev-parse HEAD)`
-- Dispatch `@review` with: description of what was built, requirements, BASE_SHA, HEAD_SHA
+- Commit range comes from the build subagent's reported SHAs (`base..head` in its DONE summary / the ledger) — you do not run `git`.
+- Dispatch `@review` with: description of what was built, requirements, the `base..head` range, and the worktree path; `@review` fetches its own diff.
 - Fix Critical issues immediately, fix Important issues before proceeding, note Minor
 
 **Red Flags (SDD):**
@@ -297,7 +297,7 @@ Use the Subagent-Driven Development (SDD) pattern to execute each task:
 - Never skip task review or accept a report missing either verdict (spec compliance AND task quality)
 - Never proceed with unfixed issues
 - Never dispatch multiple implementation subagents in parallel (causes conflicts)
-- Never make a subagent read the whole plan file — use `scripts/task-brief`
+- Never make a subagent read the whole plan file — extract the task into a brief (read plan → write brief)
 - Never accept "close enough" on spec compliance
 - Never tell a reviewer what not to flag or pre-rate severity
 - Never move to next task while review has open Critical/Important issues
