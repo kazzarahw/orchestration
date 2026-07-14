@@ -55,3 +55,12 @@ This is the "err toward thorough / want to do more" behavior the feature targets
 
 - Enumerable Coverage Contract + proportionality + err-thorough: **verified live on the weak model.**
 - Convergent loop: **deferred** — needs a genuinely non-enumerable target (large multi-file, or a cascading re-runnable check) to observe. Flagged for the user's call on whether to (a) accept convergent as a documented-but-rarely-triggered fallback, (b) add the re-discovery-pass refinement above, or (c) build a heavier convergent validation target.
+
+## Re-test after Task 7 refinement (2026-07-14)
+
+Chose **(b)** — added the re-discovery pass. Re-ran the tiny `calc.py` "find and fix all the bugs" case: the weak model **still** classified it enumerable/closed and chose Quick — because the 3 bugs are annotated in comments, so the set genuinely *is* closed and fully known. This confirmed two things:
+
+1. Coupling re-discovery to an R0.5 "open-ended" flag is fragile — the weak model collapses a small "all X" target to enumerable. **Hardened:** the R3b re-discovery trigger (and the `review.md` check) now key off the **request's phrasing** ("all / every / any / until clean") read from the recorded request text, *independent of the R0.5 classification*.
+2. **R3b-level behavior is unobservable via single-turn `opencode run`** — turn 1 is R0.5 only; the re-discovery pass fires after a full build→review cycle. So the re-discovery pass and the convergent loop are **validated-by-prose**; observing them end-to-end needs a full multi-turn session on a genuinely open-ended target. Not run here.
+
+**Net:** the enumerable Coverage Contract, proportionality, and err-thorough behaviors are verified live on the weak model. The open-ended termination guarantee (re-discovery / convergent loop) is implemented, hardened against the weak model's classification bias, and validated-by-prose — end-to-end behavioral proof is an optional heavier follow-up.
