@@ -24,7 +24,7 @@ permission:
     "*.json": allow
     "*.jsonc": allow
     ".opencode/**": allow
-  bash: allow
+  bash: deny
   task:
     "*": deny
     "design": allow
@@ -37,8 +37,8 @@ permission:
     "general": allow
   todowrite: allow
   question: deny
-  webfetch: allow
-  websearch: allow
+  webfetch: deny
+  websearch: deny
   skill: allow
 ---
 

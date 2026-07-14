@@ -99,7 +99,7 @@ permission:
     "*.json": allow
     "*.jsonc": allow
     ".opencode/**": allow
-  bash: deny
+  bash: allow
   task:
     "*": deny
     "general": allow
