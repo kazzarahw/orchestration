@@ -49,7 +49,7 @@ Agent definitions live at `src/agents/<name>.md`. YAML frontmatter controls Open
 - `permission` — per-tool allow/deny map
 - `temperature`, `color`
 
-The `src/agents/orchestrate.md` primary agent is the main entry point for all development work. It orchestrates the development lifecycle: brainstorm + critique (Design) → plan + critique (Plan) → implement + review (Build) → final Review + dogfood, delegating code changes to the build subagent and never writing implementation code directly.
+The `src/agents/orchestrate.md` primary agent is the main entry point for all development work. It orchestrates the development lifecycle: brainstorm + critique (Design) → plan + critique (Plan) → implement + review (Build) → final Review + dogfood, delegating code changes to the build subagent and never writing implementation code directly. Before delegating, R0.5 emits a **Coverage Contract** — every part of the request enumerated (or, for open-ended "all X" requests, a re-discovery pass committed) — persisted in the SDD ledger and verified 100% at the R3b completeness gate, so no part is silently dropped.
 
 ## Plugins
 

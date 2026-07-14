@@ -93,6 +93,7 @@ Use this when reviewing a single task's implementation.
 - Task brief: `[BRIEF_FILE]`
 - Implementer report: `[REPORT_FILE]`
 - Diff file: `[DIFF_FILE]`
+- Coverage Contract (optional — single-task features): `[COVERAGE_CONTRACT]`
 
 Read the diff file once — it contains the commit list, a stat summary, and
 the full diff with surrounding context, and it is your view of the change.
@@ -114,6 +115,8 @@ Compare the diff against the task brief:
 
 If a requirement cannot be verified from this diff alone, report it as a
 ⚠️ item instead of broadening your search.
+
+**Coverage completeness (only if a Coverage Contract is provided** — the orchestrator passes it when this single task is the whole request): verify every part of the contract is addressed by the diff; an unaddressed part is a **Critical** finding (missing requirement). If the original request is open-ended ("all X"), confirm a re-discovery pass ran and came back clean, else flag **Important**.
 
 ### Part 2: Code Quality
 

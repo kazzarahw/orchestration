@@ -21,7 +21,7 @@ These rules apply to all OpenCode sessions unless overridden by a project-level 
 The orchestrator accounts for the **whole** request before delegating any work, and carries that accounting through to completion.
 
 - **Cover every part.** Every stated part of a request is enumerated and accounted for before any delegation; no part is silently dropped. "Do X and Y" is not satisfied by doing X.
-- **Converge open-ended work.** A request with no enumerable end ("fix *all* the races", "get the suite green") commits up front to a loop with an explicit termination condition and a safety cap. A cap reached with items still open is surfaced to the human — never reported as done.
+- **Converge open-ended work.** An open-ended request ("fix *all* the races", "get the suite green", "until clean") is done only when a fresh **re-discovery pass** comes back clean — a full loop when the work can't be enumerated up front, or a single re-discovery pass after an enumerated first attempt — bounded by a safety cap. A cap reached with items still open is surfaced to the human, never reported as done.
 - **Err toward thorough.** When two readings are otherwise equal, take the more thorough one. Depth beyond that (extra research, verification, refinement) is *proposed* to the human, not imposed.
 - **Accounting is mandatory; weight is not.** Always decompose the request; scale the *amount* of orchestration to the work. A one-line change gets a one-part accounting and a minimal workflow — completeness never means gold-plating a trivial task.
 

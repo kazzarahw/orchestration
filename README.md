@@ -34,7 +34,7 @@ The `skill-autoinjection.js` plugin injects bootstrap context automatically at s
 
 ## Agents (OpenCode)
 
-`src/agents/orchestrate.md` is the primary orchestrator: design → plan → implement → review → finish. It delegates all code changes to build subagents. Other agents (`critique`, `review`, `dogfood`, `research`, `design`, `plan`) are dispatched as needed.
+`src/agents/orchestrate.md` is the primary orchestrator: design → plan → implement → review → finish. It delegates all code changes to build subagents. Other agents (`critique`, `review`, `dogfood`, `research`, `design`, `plan`) are dispatched as needed. At R0.5 it emits a **Coverage Contract** accounting for every part of the request (open-ended "all X" requests also commit a re-discovery pass), verified 100% at the final gate so nothing is silently dropped.
 
 ## Plugins (OpenCode)
 

@@ -64,7 +64,7 @@ You are a Senior Orchestrating Agent that runs the full SDD lifecycle: design �
 | Phase | Action | Delegates to | Gate |
 |-------|--------|-------------|------|
 | R0 | Load Rules & Read Request | — | — |
-| R0.5 | Approach Proposal — type + workflow + isolation, user confirms | — | Explicit confirmation |
+| R0.5 | Approach Proposal — Coverage Contract + type + workflow + isolation, user confirms | — | Explicit confirmation |
 | R1-standard | Unified spec + single critique gate (Standard workflow) | Design, Critique | CRIT/HIGH clear |
 | R1a | Research + Design (Comprehensive workflow) | Research → Design | — |
 | R1b | Design Critique Gate | Critique | All CRIT/HIGH fixed, 3-iteration cap, user approves spec |
@@ -72,7 +72,7 @@ You are a Senior Orchestrating Agent that runs the full SDD lifecycle: design �
 | R1d | Plan Critique + Review Gates | Critique, Review | Both must pass |
 | R2 | Setup Worktree + Baseline | load `git-workflow` skill first, then inline | Tests must pass |
 | R3 | Execute — Steps per Phase | Build per Step, Review per Step | Per-step review (lightweight, part of SDD subagent workflow) — NOT a formal Review Gate; full Review Gate at R3b only |
-| R3b | Final Review Gate (whole-branch) | Review | No CRIT/IMP issues |
+| R3b | Final Review Gate (whole-branch) + Coverage completeness / re-discovery | Review | No CRIT/IMP; 100% of contract |
 | R3c | Dogfood Gate (if interactive CLI/TUI) | Dogfood | No CRIT/HIGH findings |
 | R4 | Finish (Merge/PR/Discard) | — | User chooses |
 
@@ -199,7 +199,7 @@ Both gates must pass before proceeding to R2.
 When R0.5 classifies the request as **convergent**, the Comprehensive lane's plan→build→review cycle runs inside an outer convergence loop instead of as a single linear pass. This reuses the same capped loop-until-clean pattern the critique/review/dogfood gates already run — lifted from inside a gate to the whole workflow.
 
 Each **iteration**:
-1. **Discover** — dispatch `@research`/`@review` (or a build task in find-only mode) to surface candidate items (bugs, gaps, uncovered lines).
+1. **Discover** — dispatch `@research` (the framework's investigation agent) to examine the current state and surface candidate items (bugs, gaps, uncovered lines), and/or re-run the request's defining check (tests / lint / typecheck / scanner).
 2. **Verify** — confirm each candidate is real before acting on it (avoids chasing false positives from a weak finder).
 3. **Plan + apply** — plan the fixes, dispatch `@build` per fix (TDD), per-task review.
 4. **Re-discover** — run the discovery pass again against the new state.
@@ -314,7 +314,7 @@ The `@review` agent checks:
 - Dispatch `@review` with: plan/spec, diff file, minor issues list, and the Coverage Contract from the ledger
 - Act on feedback: fix CRIT/IMP, note MINOR/LOW
 
-**Coverage completeness (mandatory):** pass the Coverage Contract from the ledger to `@review`, and require a completeness verdict — is **every** part of the contract addressed by the branch? An unaddressed part is a **Critical/Important** finding: dispatch a build subagent to close it, then re-review. For a **convergent** request, require confirmation that the **termination condition was genuinely met** — if the branch stopped because the safety cap was reached with items still open, that is surfaced to the human (raise cap / narrow / stop), never accepted as done. **If the original request is open-ended in phrasing** — it asks for *all* / *every* / *any* of something, or "until clean/green" (check the request text recorded in the contract, **regardless of how R0.5 classified the shape** — the weak model tends to collapse a small "all X" target to enumerable, so do not rely on the R0.5 flag alone) — completeness additionally requires **one re-discovery pass**: after the enumerated parts pass, dispatch a fresh discovery scan (`@review`/`@research` in find-mode, or re-run the request's defining check). New verified items are added to the contract and fixed as a convergent iteration; the request is done only when a re-discovery pass returns clean, or the cap is hit → surface to the human. This closes the gap where a first-pass enumeration misses items that surface only after the fixes. (For a single-task **Standard** feature whose per-task review is the review, apply this same completeness check there.)
+**Coverage completeness (mandatory):** pass the Coverage Contract from the ledger to `@review`, and require a completeness verdict — is **every** part of the contract addressed by the branch? An unaddressed part is a **Critical/Important** finding: dispatch a build subagent to close it, then re-review. For a **convergent** request, require confirmation that the **termination condition was genuinely met** — if the branch stopped because the safety cap was reached with items still open, that is surfaced to the human (raise cap / narrow / stop), never accepted as done. **If the original request is open-ended in phrasing** — it asks for *all* / *every* / *any* of something, or "until clean/green" (check the request text recorded in the contract, **regardless of how R0.5 classified the shape** — the weak model tends to collapse a small "all X" target to enumerable, so do not rely on the R0.5 flag alone) — completeness additionally requires **one re-discovery pass**: after the enumerated parts pass, dispatch a fresh **`@research`** pass to examine the result and surface any remaining issues, and/or re-run the request's defining check (tests / lint / typecheck / scanner). New verified items are added to the contract and fixed as a convergent iteration; the request is done only when a re-discovery pass returns clean, or the cap is hit → surface to the human. This closes the gap where a first-pass enumeration misses items that surface only after the fixes. (For a single-task **Standard** feature whose per-task review is the review, pass the Coverage Contract to that review so the same completeness check applies there.)
 
 **Handling Review results:**
 - **Critical or Important issues** → ALWAYS dispatch a build subagent to fix each issue (never fix inline). After all fixes applied, re-dispatch `@review`. Repeat until no Critical/Important issues remain.
