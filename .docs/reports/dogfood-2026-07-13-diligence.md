@@ -64,3 +64,36 @@ Chose **(b)** — added the re-discovery pass. Re-ran the tiny `calc.py` "find a
 2. **R3b-level behavior is unobservable via single-turn `opencode run`** — turn 1 is R0.5 only; the re-discovery pass fires after a full build→review cycle. So the re-discovery pass and the convergent loop are **validated-by-prose**; observing them end-to-end needs a full multi-turn session on a genuinely open-ended target. Not run here.
 
 **Net:** the enumerable Coverage Contract, proportionality, and err-thorough behaviors are verified live on the weak model. The open-ended termination guarantee (re-discovery / convergent loop) is implemented, hardened against the weak model's classification bias, and validated-by-prose — end-to-end behavioral proof is an optional heavier follow-up.
+
+## End-to-end interactive drive via tmux (2026-07-14) — re-discovery pass OBSERVED EXECUTING
+
+Single-turn `opencode run` only shows turn 1 (R0.5). Driving the **interactive TUI in tmux** (`variant: max`) through a full Standard lifecycle removed that limitation. Target: `dog-live/calc.py` — 3 commented bugs + **1 subtle uncommented bug** (`factorial` `range(1,n)` off-by-one).
+
+**R0.5 (interactive):** the weak model produced the Task-7 axes exactly — **Shape: Enumerable** *and* **Open-ended: Yes — "all the bugs" carries a re-discovery obligation** — as *independent* axes. The Coverage Contract listed all 4 fixes (**including the subtle uncommented `factorial` bug**), plus item 6 "Re-discovery pass — fresh scan to confirm no bugs remain after fixes." It then built a todo list containing an explicit `R3b: Re-discovery pass` lifecycle step.
+
+**Execution (22m, fully autonomous after one R0.5 approval):**
+- Created `fix/calc-bugs`, TDD per bug (test commit → fix commit), per-task review ×4 all PASS.
+- **The re-discovery pass executed** — it wrote **9 Hypothesis property tests (900 random examples)** as the "fresh scan," found an IEEE-754 precision edge case (`2⁵³+1`), correctly reasoned *"this is the kind of issue the re-discovery pass was designed to catch … not a production bug"*, and fixed the **test strategy** (not the production code). Clean: 0 new bugs.
+- R4 summary table: Per-task reviews ✅, Whole-branch review ✅, **Re-discovery (Hypothesis) ✅ 900 examples 0 bugs**, Tests ✅ 49/49.
+
+**The SDD ledger (`progress.md`) — direct proof of Task 2 + Task 4 + Task 7 together:**
+```
+## Coverage Contract (confirmed R0.5)
+- [x] 1. Fix `add` — `a - b` → `a + b`
+- [x] 2. Fix `average` — remove stray `+ 1`
+- [x] 3. Fix `is_even` — `n % 2 == 1` → `n % 2 == 0`
+- [x] 4. Fix `factorial` — `range(1, n)` → `range(1, n+1)`
+- [x] 5. Write tests for all 4 functions
+- [x] 6. Re-discovery pass — Hypothesis property tests, confirm no further bugs (clean — 900 examples, 0 failures)
+- [x] 7. All tests pass clean (49/49)
+```
+(Preserved at `scratchpad/dog-live-ledger.md`.)
+
+## Final status — VERIFIED END-TO-END on the weak free model
+
+- Coverage Contract at R0.5 (enumerable + open-ended axes): **verified.**
+- Proportionality (trivial→Quick, small→Standard; no gold-plating): **verified.**
+- Err-toward-thorough (caught subtle bug, false-positive rejection, unprompted guards + property tests): **verified.**
+- Ledger persistence (contract header + per-part checkboxes + execution log): **verified.**
+- **Re-discovery pass for open-ended requests: verified executing** (Hypothesis fresh-scan, clean-termination). No longer deferred.
+- Convergent classification: **verified** the weak model reaches it when driven at `max` (it named the task "convergent/open-ended" at R0). A genuinely non-enumerable multi-file target remains untested, but the termination guarantee it exists to deliver is confirmed via the re-discovery path.
