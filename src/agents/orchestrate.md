@@ -276,6 +276,8 @@ Use the Subagent-Driven Development (SDD) pattern to execute each task:
 
 **Durable progress:**
 - Maintain a progress ledger at `.opencode/sdd/progress.md`
+- Write the confirmed **Coverage Contract** as a header block at the top of the ledger when the workspace is created (≤ R2): each enumerable part on its own status line (`- [ ] Part: <…> → <task(s)>`), updated to `- [x]` only after that part's work passes review. For a **convergent** request, record the loop, termination condition, and cap, then append one line per iteration (`Iteration N: <found> / <verified> / <fixed>; termination met? <yes/no>`).
+- The contract header is the completeness source of truth: after compaction, trust it + `git log` over recollection to see what parts remain. No part flips to `[x]` without review evidence.
 - After each clean review, append: `Task N: complete (commits <base7>..<head7>, review clean)`
 - After compaction, trust the ledger and `git log` over recollection
 - Check for existing ledger at skill start to resume interrupted sessions
