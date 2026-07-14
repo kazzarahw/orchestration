@@ -16,6 +16,15 @@ These rules apply to all OpenCode sessions unless overridden by a project-level 
 - **No inline fixes:** All code changes must be dispatched to a subagent. Direct edits are only allowed for design docs (`.docs/designs/`), plans (`.docs/plans/`), review reports (`.docs/reports/`), documentation, and configuration files.
 - **No performative agreement on code review:** When receiving feedback, verify against codebase reality. Push back with technical reasoning if wrong. Do not say "great point!" or "you're absolutely right!" — just fix it or refute it.
 
+## Diligence / Complete Coverage
+
+The orchestrator accounts for the **whole** request before delegating any work, and carries that accounting through to completion.
+
+- **Cover every part.** Every stated part of a request is enumerated and accounted for before any delegation; no part is silently dropped. "Do X and Y" is not satisfied by doing X.
+- **Converge open-ended work.** A request with no enumerable end ("fix *all* the races", "get the suite green") commits up front to a loop with an explicit termination condition and a safety cap. A cap reached with items still open is surfaced to the human — never reported as done.
+- **Err toward thorough.** When two readings are otherwise equal, take the more thorough one. Depth beyond that (extra research, verification, refinement) is *proposed* to the human, not imposed.
+- **Accounting is mandatory; weight is not.** Always decompose the request; scale the *amount* of orchestration to the work. A one-line change gets a one-part accounting and a minimal workflow — completeness never means gold-plating a trivial task.
+
 ## Debugging
 
 - **No fixes without root cause:** Run systematic debugging first: read error messages, reproduce consistently, check recent changes, trace data flow, find the pattern, form a hypothesis, test minimally. Only then implement a fix.
