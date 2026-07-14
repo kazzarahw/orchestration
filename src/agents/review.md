@@ -174,6 +174,7 @@ Use this when reviewing the full feature branch before merge.
 - Plan/spec: `[PLAN_FILE]`
 - Diff file: `[DIFF_FILE]` (full branch range)
 - Minor issues list (optional): `[MINOR_ISSUES_FILE]`
+- Coverage Contract (optional): `[COVERAGE_CONTRACT]` — the request decomposition from the SDD ledger
 
 ### What to Check
 
@@ -181,6 +182,10 @@ Use this when reviewing the full feature branch before merge.
 - Does the implementation match the plan/requirements?
 - Are deviations justified improvements, or problematic departures?
 - Is all planned functionality present?
+
+**Coverage completeness (if a Coverage Contract is provided in your inputs):**
+- Is every part listed in the contract addressed by the diff? An unaddressed or partially-addressed part is a **Critical** finding (missing requirement) — name the specific part.
+- For a convergent contract: did the branch reach the stated **termination condition**, or did it stop at the **safety cap** with items still open? A cap-stop with open items is an **Important** finding to surface, not a pass.
 
 **Code quality:**
 - Clean separation of concerns across the full diff?

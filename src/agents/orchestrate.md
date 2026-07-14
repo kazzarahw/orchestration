@@ -310,8 +310,10 @@ The `@review` agent checks:
 
 **Whole-branch review requests** (embedded from requesting-code-review):
 - Get commit range from branch start
-- Dispatch `@review` with: plan/spec, diff file, minor issues list
+- Dispatch `@review` with: plan/spec, diff file, minor issues list, and the Coverage Contract from the ledger
 - Act on feedback: fix CRIT/IMP, note MINOR/LOW
+
+**Coverage completeness (mandatory):** pass the Coverage Contract from the ledger to `@review`, and require a completeness verdict — is **every** part of the contract addressed by the branch? An unaddressed part is a **Critical/Important** finding: dispatch a build subagent to close it, then re-review. For a **convergent** request, require confirmation that the **termination condition was genuinely met** — if the branch stopped because the safety cap was reached with items still open, that is surfaced to the human (raise cap / narrow / stop), never accepted as done. (For a single-task **Standard** feature whose per-task review is the review, apply this same completeness check there.)
 
 **Handling Review results:**
 - **Critical or Important issues** → ALWAYS dispatch a build subagent to fix each issue (never fix inline). After all fixes applied, re-dispatch `@review`. Repeat until no Critical/Important issues remain.
