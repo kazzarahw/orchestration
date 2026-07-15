@@ -97,3 +97,26 @@ from a `@research`/recon dispatch or are simply not required for the Approach Pr
   impossible now (`bash: deny`); it must dispatch or infer from a report. This is the point.
 - **git-workflow skill** — still loaded, but by the `@build` setup task that creates the worktree, not
   by the orchestrator inline.
+
+## Refinement (2026-07-14): analysis-as-deliverable → `@research`
+
+The dogfood campaign (`.docs/reports/dogfood-2026-07-14-handless-campaign.md`) showed the orchestrator
+does *read-based* analysis inline — e.g. it produced a 24-finding security audit itself via `read ×30`.
+Handless removed *hands* (bash/edit/web), not *eyes* (read), so this isn't a regression, but it's the
+orchestrator producing a *deliverable* by hand.
+
+**Guideline (prose, not structural).** Distinguish **framing** from **deliverable**:
+- **Framing reads stay inline** — the orchestrator must read enough to classify, decompose, and write
+  the Coverage Contract; it can't delegate its own comprehension, and a dispatch round-trip for that
+  is overhead.
+- **Analysis-as-deliverable delegates to `@research`** — when the report *is* what the user asked for
+  (audit / assessment / "understand & document X" / research write-up), `@research` produces it
+  (methodology + a persisted `.docs/reports/` artifact) and the orchestrator relays + gates. On a
+  large/unfamiliar codebase, a recon `@research` pass keeps the orchestrator lean even during framing.
+
+**Why prose, not a weld:** `read` is a single tool — there's no way to deny "analysis reads" while
+allowing "framing reads." So this is a *soft steer* a weak model won't always follow, and that's
+acceptable: the failure mode (inline read-analysis) is safe and often good — a consistency/context
+concern, not a safety hole like `bash` was. `@research` also runs the *same* model, so the wins are
+methodology + context isolation + durable report, not smarter analysis. Changes: `orchestrate.md` R0
+framing note + an R0.5 routing case.
