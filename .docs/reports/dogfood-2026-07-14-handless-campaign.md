@@ -81,3 +81,16 @@
 3. Free-model latency: R0→proposal ≈ 1–6.5 min. Fine unattended.
 
 **Verdict:** the handless orchestrator is **consistent and solid** across task kinds (programming, diagnostics, security analysis, research, config) and difficulty. No handless-related regressions. Recommend merge; the two findings are separate follow-ups.
+
+---
+
+## Post-campaign refinement — analysis-as-deliverable → `@research` (VALIDATED)
+
+Finding 1 (read-analysis inline) was addressed with a prose guideline: framing reads stay inline; analysis that *is* the deliverable delegates to `@research` (`orchestrate.md` R0 framing note + R0.5 routing case). Re-ran the **same vtm security audit** (R6):
+
+| | R2 (before) | R6 (after) |
+|---|---|---|
+| orchestrator inline `read` | 30 | **2** (framing only) |
+| the audit | produced inline by hand | **delegated to `@research`** across 6 audit areas |
+
+R6's R0.5: *"dispatch `@research` to investigate the full codebase and produce a structured security audit report; I relay + gate, produce no code changes"* — and gated before dispatching. The steer works on the weak model (though, being prose over `read`, it's a soft steer, not a weld — acceptable per the design). Finding 2 (`customize-opencode` phantom skill) remains an independent follow-up.
