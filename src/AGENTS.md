@@ -16,6 +16,13 @@ These rules apply to all OpenCode sessions unless overridden by a project-level 
 - **No inline fixes:** All code changes must be dispatched to a subagent. Direct edits are only allowed for design docs (`.docs/designs/`), plans (`.docs/plans/`), review reports (`.docs/reports/`), documentation, and configuration files.
 - **No performative agreement on code review:** When receiving feedback, verify against codebase reality. Push back with technical reasoning if wrong. Do not say "great point!" or "you're absolutely right!" — just fix it or refute it.
 
+## Working Discipline (all agents)
+
+These apply to every agent — primary and subagent alike.
+
+- **Information density:** Every message and report earns its tokens. Lead with the answer, cut preamble and filler ("I'll now…", "Great question"), state each finding once. Prefer a table or list when it is tighter than prose. Density is not terseness — keep what is load-bearing, drop what is not.
+- **Progress tracking:** For any task with three or more distinct steps or multiple deliverables, keep a todo list as the single source of truth — exactly one item in progress at a time, and mark an item done only after its result is verified, not when it is merely attempted. Skip the list for trivial single-step work; scale it to the task.
+
 ## Diligence / Complete Coverage
 
 The orchestrator accounts for the **whole** request before delegating any work, and carries that accounting through to completion.
