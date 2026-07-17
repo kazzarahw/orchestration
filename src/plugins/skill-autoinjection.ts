@@ -110,7 +110,7 @@ export const SkillAutoinjectionPlugin: Plugin = async (_input, options = {}) => 
 
   let globalSkillNames: string[] = [];
   const injectionCache = new Map<string, string | null>();
-  let injected = false; // dedup: inject the bundle once per plugin instance (session)
+  const injectedSessions = new Set<string>(); // dedup keyed by session id — see hook docblock
 
   return {
     /** Register the skills path and resolve the skill list to inject. */
@@ -136,12 +136,20 @@ export const SkillAutoinjectionPlugin: Plugin = async (_input, options = {}) => 
      *
      * The hook `input` is `{}` (OpenCode provides no agent identity here), so per-agent
      * skill lists are not possible in this hook — the global list applies to every agent.
-     * Fires per model round-trip; we inject once per session (dedup flag) to avoid
-     * duplicating the bundle mid-turn.
+     * Fires per model round-trip. OpenCode instantiates this plugin ONCE per process, so a
+     * module-level boolean flag would inject only into the first session (the primary) and
+     * starve every dispatched subagent (verified via session-id instrumentation). We therefore
+     * dedup on the session id: each session — primary and subagent alike — gets exactly one
+     * injection, with no mid-turn duplication.
      */
     'experimental.chat.messages.transform': async (_input, output) => {
-      if (injected) return;
       if (!globalSkillNames.length || !output.messages?.length) return;
+
+      // Dedup per SESSION (see docblock): key on the session id of the current messages.
+      const sample = output.messages[output.messages.length - 1];
+      const sampleInfo = sample.info as Record<string, unknown>;
+      const sessionKey = (sampleInfo.sessionID as string | undefined) ?? '__no_session__';
+      if (injectedSessions.has(sessionKey)) return;
 
       const blocks: string[] = [];
       for (const name of globalSkillNames) {
@@ -154,13 +162,12 @@ export const SkillAutoinjectionPlugin: Plugin = async (_input, options = {}) => 
 
       // Clone an existing message so the pushed message satisfies OpenCode's {info, parts}
       // shape; override role to `user` and drop identity fields (fresh message, same session).
-      const sample = output.messages[output.messages.length - 1];
-      const { id: _id, sessionID: _sid, ...restInfo } = sample.info as Record<string, unknown>;
+      const { id: _id, sessionID: _sid, ...restInfo } = sampleInfo;
       output.messages.push({
         info: { ...restInfo, role: 'user' },
         parts: [{ type: 'text', text }],
       } as (typeof output.messages)[number]);
-      injected = true;
+      injectedSessions.add(sessionKey);
     },
   };
 };
